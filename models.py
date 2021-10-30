@@ -96,4 +96,15 @@ class SpecialPrice(models.Model):
         on_delete = models.DO_NOTHING
     )
 
+# * how to get price :
+# 必须借房间
+# 设置不选择乐器为一种price = 0的移动乐器
+# input: (instrument, room, user)
+# 1. 获取user的usergroup
+# 2. 判断instrument是否为固定乐器
+### 2.1如果instrument为固定乐器,let retprice = instruent.price
+### 2.2如果instrument不是固定乐器（移动乐器）,let retprice = instrument.price + room.price
+# 3. 暂定：枚举room下所有SpecialPrice s: (总之就是通过某种方法找special price)
+### 3.1 如果s满足s.group = usergroup, s.inst = instrument, let retprice = min(retprice, s.price)
+# 4. 返回retprice
 
