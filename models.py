@@ -16,18 +16,18 @@ class UserProfile(models.Model):
 
 class Room(models.Model):
     name = models.CharField(max_length = 10)
-    price = models.IntegerField(default = 0) # * price if "only" borrow room
-    inst = models.ManyToManyField(
-        "Instruments",
-        on_delete = models.DO_NOTHING,
-    )
+    price = models.IntegerField(default = 0) # 房屋的默认价格
+    maxInst = models.IntegerField(default = 1) # 房屋最多可以放置多少乐器
     def __str__(self) -> str:
         return self.name
 
 class Instrument(models.Model):
     name = models.CharField(max_length = 30)
-    price = models.IntegerField(default = 0) # * default price
-    type = models.ForeignKey(
+    price = models.IntegerField(default = 0) # 音乐的默认价格
+    room = models.ManyToManyField( # 可以去往的房间
+        "Room", 
+    )
+    type = models.ForeignKey( # 乐器类型
         "InstrumentType",
         on_delete = models.CASCADE,
     )
@@ -79,30 +79,35 @@ class UserGroup(models.Model):
     def __str__(self) -> str:
         return self.name
 
-# * special price rules
+# 特殊规则
 class SpecialPrice(models.Model):
-    price = models.IntegerField(default = 0)
-    group = models.ForeignKey(
+    price = models.IntegerField(default = 0) # 符合该特殊规则，可以采用的具体价格
+    group = models.ForeignKey( # 特殊规则针对的单个用户组 
         "UserGroup",
-        on_delete = models.DO_NOTHING
+        on_delete = models.CASCADE,
     )
-    inst = models.ForeignKey(
+    inst = models.ForeignKey( 
+    # 特殊规则针对的某个乐器 / 某个乐器类型(添加通配某类型的通配乐器) / 所有乐器(添加通配所有乐器的通配乐器) 
+    # OR: 采用其他字段来存储是否通配
         "Instrument",
-        on_delete = models.DO_NOTHING
+        on_delete = models.CASCADE,
     )
-    room = models.ForeignKey(
+    room = models.ForeignKey( 
+    # 特殊规则针对的单个房间 / 所有房间(添加通配所有房间的通配房间)
+    # OR: 采用其他字段来存储是否通配
         "Room",
-        on_delete = models.DO_NOTHING
+        on_delete = models.CASCADE,
     )
 
-# * how to get price :
-# 必须借房间
-# 设置不选择乐器为一种price = 0的移动乐器
+# 检查占用：
+# 1. 通过枚举相关order确定每个时刻占用乐器数量
+# 2. 将某时刻占用乐器数量，与最大同时占用数量进行比较
+
+# 检查价格
 # input: (instrument, room, user)
-# 1. 获取user的usergroup
-# 2. 判断instrument是否为固定乐器
-### 2.1如果instrument为固定乐器,let retprice = instruent.price
-### 2.2如果instrument不是固定乐器（移动乐器）,let retprice = instrument.price + room.price
-# 3. 暂定：枚举room下所有SpecialPrice s: (总之就是通过某种方法找special price)
-### 3.1 如果s满足s.group = usergroup, s.inst = instrument, let retprice = min(retprice, s.price)
-# 4. 返回retprice
+# 1. room.price+inst.price得到通用价格
+# 2. 考虑每一个符合input的特殊规则，在所有价格里取min
+
+# 禁用房间：
+# 1. 赋予该规则一个负数价格
+# 2. 如果某个input检查价格得到了负数，说明它被某规则禁用
