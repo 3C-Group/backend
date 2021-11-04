@@ -1,3 +1,4 @@
+import datetime
 from django.conf import settings
 from django.db import models
 
@@ -34,14 +35,20 @@ class Instrument(models.Model):
     def __str__(self) -> str:
         return self.name
 
+class TypeManager(models.Manager):
+    def create_type(self, name):
+        type = self.create(name = name)
+        return type
+
 class InstrumentType(models.Model):
     name = models.CharField(max_length = 30)
     def __str__(self) -> str:
         return self.name
+    objects = TypeManager()
 
 class Order(models.Model):
-    begin_time = models.TimeField()
-    end_time = models.TimeField()
+    begin_time = models.DateTimeField(default = datetime.datetime(1, 1, 1))
+    end_time = models.DateTimeField(default = datetime.datetime(1, 1, 1))
     user = models.ForeignKey(
         "UserProfile",
         on_delete = models.DO_NOTHING,
@@ -50,13 +57,11 @@ class Order(models.Model):
         "Room",
         on_delete = models.DO_NOTHING,
         blank = True,
-        null = True,
     )
     inst = models.ForeignKey(
         "Instrument",
         on_delete = models.DO_NOTHING,
         blank = True,
-        null = True,
     )
     price = models.IntegerField(default = 0) # 原价
     paid = models.IntegerField(default = 0)  # 实际支付的金额
@@ -71,8 +76,8 @@ class Order(models.Model):
         return "{0} {1} {2}".format(self.user.profile.get_username(), self.inst.name, self.room.name)
 
 class Unavailability(models.Model):
-    begin_time = models.TimeField()
-    end_time = models.TimeField()
+    begin_time = models.DateTimeField(default = datetime.datetime(1, 1, 1))
+    end_time = models.DateTimeField(default = datetime.datetime(1, 1, 1))
 
 class UserGroup(models.Model):
     name = models.CharField(max_length = 30)
