@@ -17,14 +17,12 @@ class UserProfile(models.Model):
 
 class Room(models.Model):
     name = models.CharField(max_length = 10)
-    price = models.IntegerField(default = 0) # 房屋的默认价格
     maxInst = models.IntegerField(default = 1) # 房屋最多可以放置多少乐器
     def __str__(self) -> str:
         return self.name
 
 class Instrument(models.Model):
     name = models.CharField(max_length = 30)
-    price = models.IntegerField(default = 0) # 音乐的默认价格
     room = models.ManyToManyField( # 可以去往的房间
         "Room", 
     )
@@ -84,35 +82,72 @@ class UserGroup(models.Model):
     def __str__(self) -> str:
         return self.name
 
-# 特殊规则
-class SpecialPrice(models.Model):
-    price = models.IntegerField(default = 0) # 符合该特殊规则，可以采用的具体价格
+class RoomPrice(models.Model): # 房间价格
+    price = models.IntegerField(default = 0) #
+    group = models.ForeignKey( # 特殊规则针对的单个用户组 
+        "UserGroup",
+        on_delete = models.CASCADE,
+    )
+    room = models.ForeignKey( 
+        "Room",
+       on_delete = models.CASCADE,
+    )
+
+class InstrumentTypePrice(models.Model): # 乐器类型的价格
+    price = models.IntegerField(default = 0) #
     group = models.ForeignKey( # 特殊规则针对的单个用户组 
         "UserGroup",
         on_delete = models.CASCADE,
     )
     inst = models.ForeignKey( 
-    # 特殊规则针对的某个乐器 / 某个乐器类型(添加通配某类型的通配乐器) / 所有乐器(添加通配所有乐器的通配乐器) 
-    # OR: 采用其他字段来存储是否通配
-        "Instrument",
+        "InstrumentType",
+       on_delete = models.CASCADE,
+    )
+
+class ForbiddenRoom(models.Model): # 对于（用户组，房间，时间段），进行禁用
+    group = models.ForeignKey( 
+        "UserGroup",
         on_delete = models.CASCADE,
     )
     room = models.ForeignKey( 
-    # 特殊规则针对的单个房间 / 所有房间(添加通配所有房间的通配房间)
-    # OR: 采用其他字段来存储是否通配
         "Room",
+       on_delete = models.CASCADE,
+    )
+    begin_time = models.DateTimeField(default = datetime.datetime(1, 1, 1))
+    end_time = models.DateTimeField(default = datetime.datetime(1, 1, 1))
+    class Status(models.IntegerChoices):
+        FIX = 1     # 维修中
+        ACTIVITY = 2 # 活动占用
+        OTHER = 100 # 其他
+    status = models.IntegerField(choices = Status.choices, default = Status.ACTIVITY)
+
+
+class ForbiddenInstrument(models.Model): # 对于（用户组，乐器，时间段），进行禁用
+    group = models.ForeignKey( # 禁用乐器类型
+        "UserGroup",
         on_delete = models.CASCADE,
     )
+    inst = models.ForeignKey( 
+        "Instrument",
+       on_delete = models.CASCADE,
+    )
+    begin_time = models.DateTimeField(default = datetime.datetime(1, 1, 1))
+    end_time = models.DateTimeField(default = datetime.datetime(1, 1, 1))
+    class Status(models.IntegerChoices):
+        ACTIVITY = 1 # 活动占用
+        FIX = 2     # 维修
+        OTHER = 100 # 其他
+    status = models.IntegerField(choices = Status.choices, default = Status.ACTIVITY)
+
 
 # 检查占用：
+# 0. 检查是否被forbidden
 # 1. 通过枚举相关order确定每个时刻占用乐器数量
 # 2. 将某时刻占用乐器数量，与最大同时占用数量进行比较
 
 # 检查价格
 # input: (instrument, room, user)
-# 1. room.price+inst.price得到通用价格
-# 2. 考虑每一个符合input的特殊规则，在所有价格里取min
-
-# 禁用房间：
-# 1. 赋予该规则一个负数价格
-# 2. 如果某个input检查价格得到了负数，说明它被某规则禁用
+# 0. instrument -> instruemtnType ; user - > usergroup
+# 1. (usergroup, instruemntType)获取最低inst.price
+# 2. (usergroup, room)获取最低room.price
+# 3. room.price+inst.price得到final.price
