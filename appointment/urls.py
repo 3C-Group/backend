@@ -12,7 +12,7 @@ urlpatterns = [
     path('manage/room/delete/', views.delete_room, name='delete_room'),
 
     #  乐器类型的管理
-    path('manage/type/add/', views.add_type, name='manage_type'),
+    path('manage/type/add/', views.add_type, name='add_type'),
     path('manage/type/delete/', views.delete_type, name='delete_type'),
 
     # 房间与乐器的关系管理
