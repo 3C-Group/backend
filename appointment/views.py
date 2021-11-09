@@ -114,9 +114,10 @@ def manage_inst_to_room(request):
     elif request.method == "DELETE":
         try:
             req = json.loads(request.body)
-            ret = inst_service.add_inst_to_room(req["instpk"], req["roompk"]) # 移除单个乐器与单个房间的关系
+            ret = inst_service.remove_inst_from_room(
+                req["instpk"], req["roompk"])  # 移除单个乐器与单个房间的关系
             if ret == "notexist":
-                return HttpResponse("already", status=409)
+                return HttpResponse("not exist", status=409)
             # TODO : 有相关订单
             return HttpResponse("success")
         except Exception as e:

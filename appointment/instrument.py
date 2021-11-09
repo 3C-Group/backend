@@ -3,6 +3,7 @@ from django.core import serializers
 from .models import *
 from django.db.models import Q
 
+
 def get_inst_info():  # 获取所有乐器的信息
     data = serializers.serialize(
         "python", Instrument.objects.all())  # 返回dict格式的objects all
@@ -29,6 +30,7 @@ def get_inst_info():  # 获取所有乐器的信息
     json_data = json.dumps(retdata, ensure_ascii=False)  # 转为json且避免乱码
     return json_data
 
+
 def delete_inst(pk):  # 删除某一乐器
     inst = Instrument.objects.get(pk=pk)  # 尝试获取该乐器
     # 检查是否有1.即将支付，或者2.已支付但未使用的订单存在
@@ -36,6 +38,7 @@ def delete_inst(pk):  # 删除某一乐器
         return "order"  # 如果当前存在这样的乐器，不能删除
     inst.delete()
     return "success"
+
 
 def add_inst_to_room(instpk, roompk):  # 使得某一个inst可以前往room
     inst = Instrument.objects.get(pk=instpk)
@@ -48,10 +51,8 @@ def add_inst_to_room(instpk, roompk):  # 使得某一个inst可以前往room
 
 def remove_inst_from_room(instpk, roompk):  # 删除某一个inst可以前往room的关系
     inst = Instrument.objects.get(pk=instpk)
-
-#    if inst.room.filter(pk=roompk).count() == 0:  # 如果该乐器本来就不能前往该房间
-#        return "notexist"
-#    TODO: not working here
+    if inst.room.filter(pk=roompk).count() == 0:  # 如果该乐器本来就不能前往该房间
+        return "notexist"
 #    if Order.objects.all().filter(room=roompk,inst=instpk).count() == 0:  #存在对应的订单
 #        return "related order exist"
     # TODO
