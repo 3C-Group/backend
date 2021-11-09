@@ -23,6 +23,12 @@ class RoomManager(models.Manager):
         return room.pk
 
 
+class UserGroupManager(models.Manager):
+    def create_group(self, name):
+        group = self.create(name=name)
+        return group.pk
+
+
 # --- models ---
 class UserProfile(models.Model):
     profile = models.OneToOneField(
@@ -119,6 +125,8 @@ class UserGroup(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    objects = UserGroupManager()
 
 
 class RoomPrice(models.Model):  # 房间价格

@@ -15,10 +15,13 @@ urlpatterns = [
     path("manage/type/", views.manage_type, name="manage_type"),
     # 房间与乐器的关系管理
     path("manage/inst-room/", views.manage_inst_to_room, name="manage_inst_room"),
-
+    # 用户组管理
+    path("manage/usergroup/", views.manage_usergroup, name="manage_usergroup"),
 
     #  信息获取
     path("get_type/", views.get_type, name="get_type"),  # 获取所有的乐器类型信息
     path("get_inst/", views.get_inst, name="get_inst"),  # 获取所有的乐器信息
     path("get_room/", views.get_room, name="get_room"),  # 获取所有的房间信息
+    path("get_usergroup/", views.get_usergroup,
+         name="get_usergroup"),  # 获取所有的房间信息
 ]

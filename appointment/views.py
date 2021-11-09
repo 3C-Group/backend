@@ -11,6 +11,7 @@ from .models import *
 import appointment.instrument as inst_service
 import appointment.room as room_service
 import appointment.insttype as type_service
+import appointment.usergroup as usergroup_service
 
 User = get_user_model()
 
@@ -51,6 +52,16 @@ def get_room(request):  # 获取所有乐器的种类列表
     if request.method == "GET":
         try:
             data = room_service.get_room_info()
+            return HttpResponse(data)
+        except Exception as e:
+            return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
+def get_usergroup(request):  # 获取所有用户组的列表
+    if request.method == "GET":
+        try:
+            data = usergroup_service.get_group_info()
             return HttpResponse(data)
         except Exception as e:
             return HttpResponse(e, status=400)
@@ -149,9 +160,30 @@ def manage_room(request):
             return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
 
+
+# * 用户组管理
+def manage_usergroup(request):
+    if request.method == "POST":  # 创建用户组
+        try:
+            req = json.loads(request.body)
+            grouppk = UserGroup.objects.create_group(name=req["name"])
+            return HttpResponse(grouppk)
+        except Exception as e:
+            return HttpResponse(e, status=400)
+    elif request.method == "DELETE":  # 删除用户组
+        try:
+            req = json.loads(request.body)
+            ret = usergroup_service.delete_group(req["pk"])
+            # TODO: 检查是否存在对应的用户
+            #            if ret == "order":
+            #                return HttpResponse("related user exist", status=409)
+            return HttpResponse("success")
+        except Exception as e:
+            return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
 # +++++++++测试用+++++++++
-
-
 def test_upload(request):  # 测试上传图片
     if request.method == "POST":
         try:
