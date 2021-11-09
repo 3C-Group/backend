@@ -37,6 +37,7 @@ class UserProfile(models.Model):
 class Room(models.Model):
     name = models.CharField(max_length=20)
     max_inst = models.IntegerField(default=1)  # 房屋最多可以放置多少乐器
+    img = models.ImageField(default="media/room/default_room.png", upload_to='room/') # 房间的照片 
 
     def __str__(self) -> str:
         return self.name
@@ -52,6 +53,7 @@ class Instrument(models.Model):
         "InstrumentType",
         on_delete=models.CASCADE,
     )
+    img = models.ImageField(default="media/inst/default_inst.png", upload_to='inst/') # 房间的照片 
     def __str__(self) -> str:
         return self.name
     objects = InstManager()

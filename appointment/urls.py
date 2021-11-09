@@ -3,6 +3,11 @@ from . import views
 
 urlpatterns = [
     path('index/', views.index, name='index'),
+
+    # 测试用试图
+    path('view/', views.testview, name='testview'),
+    path('test_upload/', views.test_upload, name='test_upload_iamge'),
+
     #  乐器管理
     path('manage/inst/add/', views.add_inst, name='add_inst'),
     path('manage/inst/delete/', views.delete_inst, name='delete_inst'),

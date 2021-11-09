@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.http.response import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate, get_user_model
+
 from .models import *
 
 import appointment.instrument as inst_service
@@ -15,6 +16,9 @@ def index(request):
     if request.method == "POST":
         return JsonResponse(json.loads(request.body))
     return HttpResponse("index")
+
+def testview(request):
+    return render(request, 'test.html', {} )
 
 # * GET INFORMATION
 
@@ -152,6 +156,20 @@ def delete_room(request): # 删除乐器
             ret = inst_service.delete_room(req["pk"])
             if ret == "order":
                 return HttpResponse("存在有关该房间的订单尚未完成", status=401)
+            return HttpResponse("success")
+        except Exception as e:
+            return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
+# +++++++++测试用+++++++++
+def test_upload(request): # 测试上传图片
+    if request.method == "POST":
+        try:
+            img = request.FILES.get('file')
+            room = Room.objects.all()[0]
+            room.img = img
+            room.save()
             return HttpResponse("success")
         except Exception as e:
             return HttpResponse(e, status=400)
