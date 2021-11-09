@@ -2,22 +2,26 @@ import datetime
 from django.conf import settings
 from django.db import models
 
+
 # --- managers ---
 class TypeManager(models.Manager):
     def create_type(self, name):
         type = self.create(name=name)
-        return type.pk # 返回创建的"乐器类型"的pk
+        return type.pk  # 返回创建的"乐器类型"的pk
 
-class InstManager(models.Manager): 
+
+class InstManager(models.Manager):
     def create_inst(self, name, typepk):
-        insttype = InstrumentType.objects.get(pk = typepk)
-        inst = self.create(name = name, type = insttype)
+        insttype = InstrumentType.objects.get(pk=typepk)
+        inst = self.create(name=name, type=insttype)
         return inst.pk
+
 
 class RoomManager(models.Manager):
     def create_room(self, name, max_inst):
-        room = self.create(name = name, max_inst = max_inst)
+        room = self.create(name=name, max_inst=max_inst)
         return room.pk
+
 
 # --- models ---
 class UserProfile(models.Model):
@@ -27,35 +31,38 @@ class UserProfile(models.Model):
     )
     wxid = models.CharField(max_length=64)
     balance = models.IntegerField(default=0)
-    group = models.ManyToManyField(
-        "UserGroup",
-    )
+    group = models.ManyToManyField("UserGroup", )
 
     def __str__(self) -> str:
         return self.profile.get_username()
 
+
 class Room(models.Model):
     name = models.CharField(max_length=20)
     max_inst = models.IntegerField(default=1)  # 房屋最多可以放置多少乐器
-    img = models.ImageField(default="media/room/default_room.png", upload_to='room/') # 房间的照片 
+    img = models.ImageField(default="media/room/default_room.png",
+                            upload_to='room/')  # 房间的照片
 
     def __str__(self) -> str:
         return self.name
+
     objects = RoomManager()
 
 
 class Instrument(models.Model):
     name = models.CharField(max_length=30)
     room = models.ManyToManyField(  # 可以去往的房间
-        "Room",
-    )
+        "Room", )
     type = models.ForeignKey(  # 乐器类型
         "InstrumentType",
         on_delete=models.CASCADE,
     )
-    img = models.ImageField(default="media/inst/default_inst.png", upload_to='inst/') # 房间的照片 
+    img = models.ImageField(default="media/inst/default_inst.png",
+                            upload_to='inst/')  # 房间的照片
+
     def __str__(self) -> str:
         return self.name
+
     objects = InstManager()
 
 
@@ -64,6 +71,7 @@ class InstrumentType(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
     objects = TypeManager()
 
 
@@ -75,7 +83,7 @@ class Order(models.Model):
         on_delete=models.DO_NOTHING,
     )
     room = models.ForeignKey(
-        "Room", 
+        "Room",
         on_delete=models.DO_NOTHING,
         blank=True,
     )
@@ -88,15 +96,17 @@ class Order(models.Model):
     paid = models.IntegerField(default=0)  # 实际支付的金额
 
     class Status(models.IntegerChoices):
-        UNPAID = 1     # 未支付
-        PAID = 2       # 已支付但未使用
+        UNPAID = 1  # 未支付
+        PAID = 2  # 已支付但未使用
         CANCELLED = 3  # 已取消 分两种情况 支付或未支付 支付后手动取消的要将付款返到余额里
-        FINISHED = 4   # 已完成 完成后不可再取消
-        OUTDATED = 5   # 已支付 但未使用 不可取消
+        FINISHED = 4  # 已完成 完成后不可再取消
+        OUTDATED = 5  # 已支付 但未使用 不可取消
+
     status = models.IntegerField(choices=Status.choices, default=Status.UNPAID)
 
     def __str__(self) -> str:
-        return "{0} {1} {2}".format(self.user.profile.get_username(), self.inst.name, self.room.name)
+        return "{0} {1} {2}".format(self.user.profile.get_username(),
+                                    self.inst.name, self.room.name)
 
 
 class Unavailability(models.Model):
@@ -148,11 +158,12 @@ class ForbiddenRoom(models.Model):  # 对于（用户组，房间，时间段）
     end_time = models.DateTimeField(default=datetime.datetime(1, 1, 1))
 
     class Status(models.IntegerChoices):
-        FIX = 1     # 维修中
+        FIX = 1  # 维修中
         ACTIVITY = 2  # 活动占用
         OTHER = 100  # 其他
-    status = models.IntegerField(
-        choices=Status.choices, default=Status.ACTIVITY)
+
+    status = models.IntegerField(choices=Status.choices,
+                                 default=Status.ACTIVITY)
 
 
 class ForbiddenInstrument(models.Model):  # 对于（用户组，乐器，时间段），进行禁用
@@ -169,10 +180,11 @@ class ForbiddenInstrument(models.Model):  # 对于（用户组，乐器，时间
 
     class Status(models.IntegerChoices):
         ACTIVITY = 1  # 活动占用
-        FIX = 2     # 维修
+        FIX = 2  # 维修
         OTHER = 100  # 其他
-    status = models.IntegerField(
-        choices=Status.choices, default=Status.ACTIVITY)
+
+    status = models.IntegerField(choices=Status.choices,
+                                 default=Status.ACTIVITY)
 
 
 # 检查占用：
