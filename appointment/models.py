@@ -34,6 +34,15 @@ class UserProfileManager(models.Manager):
         user = self.create(openid=openid, status=status, thuid=thuid)
         return user.pk
 
+
+class InstrumentTypePriceManager(models.Manager):
+    def create_type_price(self, grouppk, typepk, price):
+        group = UserGroup.objects.get(pk=grouppk)
+        insttype = InstrumentType.objects.get(pk=typepk)
+        typeprice = self.create(group=group, insttype=insttype, price=price)
+        return typeprice.pk
+
+
 # --- models ---
 
 
@@ -163,10 +172,11 @@ class InstrumentTypePrice(models.Model):  # 乐器类型的价格
         "UserGroup",
         on_delete=models.CASCADE,
     )
-    inst = models.ForeignKey(
+    insttype = models.ForeignKey(
         "InstrumentType",
         on_delete=models.CASCADE,
     )
+    objects = InstrumentTypePriceManager()
 
 
 class ForbiddenRoom(models.Model):  # 对于（用户组，房间，时间段），进行禁用

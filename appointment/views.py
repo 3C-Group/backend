@@ -11,6 +11,7 @@ import appointment.room as room_service
 import appointment.insttype as type_service
 import appointment.usergroup as usergroup_service
 import appointment.user as user_service
+import appointment.price as price_service
 
 
 def index(request):
@@ -211,6 +212,24 @@ def manage_user_to_group(request):
                 req["userpk"], req["usergrouppk"])
             if ret == "notexist":
                 return HttpResponse("user not in this group", status=409)
+            return HttpResponse(ret)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+# * 设置（用户组，乐器类型）的价格:
+
+
+def manage_type_price(request):
+    try:
+        if request.method == "PUT":  # 设置（用户组，乐器类型）的价格
+            req = json.loads(request.body)
+            ret = price_service.set_type_price(
+                req["usergrouppk"], req["insttypepk"], req["price"])
+            return HttpResponse(ret)
+        elif request.method == "GET":
+            req = json.loads(request.body)
+            ret = price_service.get_all_price_for_type(req["insttypepk"])
             return HttpResponse(ret)
     except Exception as e:
         return HttpResponse(e, status=400)
