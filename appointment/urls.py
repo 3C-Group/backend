@@ -17,6 +17,8 @@ urlpatterns = [
     path("manage/inst_room/", views.manage_inst_to_room, name="manage_inst_room"),
     # 用户组管理
     path("manage/usergroup/", views.manage_usergroup, name="manage_usergroup"),
+    # 用户管理
+    path("manage/user/", views.manage_user, name="manage_user"),
 
     #  信息获取
     path("get_type/", views.get_type, name="get_type"),  # 获取所有的乐器类型信息
@@ -24,4 +26,6 @@ urlpatterns = [
     path("get_room/", views.get_room, name="get_room"),  # 获取所有的房间信息
     path("get_usergroup/", views.get_usergroup,
          name="get_usergroup"),  # 获取所有的用户组信息
+    path("get_user/", views.get_user, name="get_user"),  # 获得所有用户信息
+
 ]

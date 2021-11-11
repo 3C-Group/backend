@@ -1,10 +1,8 @@
 import json
-from django.core import serializers
-from django.contrib.auth.models import AnonymousUser
+from django.core.checks.messages import Error
 from django.http import HttpResponse
 from django.http.response import JsonResponse, HttpResponse
 from django.shortcuts import render
-from django.contrib.auth import authenticate, get_user_model
 
 from .models import *
 
@@ -12,8 +10,7 @@ import appointment.instrument as inst_service
 import appointment.room as room_service
 import appointment.insttype as type_service
 import appointment.usergroup as usergroup_service
-
-User = get_user_model()
+import appointment.user as user_service
 
 
 def index(request):
@@ -68,10 +65,21 @@ def get_usergroup(request):  # 获取所有用户组的列表
     return HttpResponse('Method Not Allowed', status=405)
 
 
+def get_user(request):  # 获取所有用户的列表
+    if request.method == "GET":
+        try:
+            data = user_service.get_user_info()
+            return HttpResponse(data)
+        except Exception as e:
+            return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
 # * MANAGE TYPE 乐器类型管理
+
+
 def manage_type(request):  # 新建乐器类型
     try:
-        if request.method == "POST": # 增
+        if request.method == "POST":  # 增
             req = json.loads(request.body)
             typepk = InstrumentType.objects.create_type(req["name"])
             return HttpResponse(typepk)
@@ -174,7 +182,21 @@ def manage_usergroup(request):
     return HttpResponse('Method Not Allowed', status=405)
 
 
+# * (测试用)用户管理
+def manage_user(request):
+    try:
+        if request.method == "POST":  # 测试用 ： 创建新用户
+            req = json.loads(request.body)
+            ret = user_service.get_or_create_user(req)
+            # TODO : 处理openid/thuid 403情况
+            return HttpResponse(ret["userpk"])
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=400)
+
 # +++++++++测试用+++++++++
+
+
 def test_upload(request):  # 测试上传图片
     if request.method == "POST":
         try:

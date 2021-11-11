@@ -29,14 +29,20 @@ class UserGroupManager(models.Manager):
         return group.pk
 
 
+class UserProfileManager(models.Manager):
+    def create_user(self, openid, status, thuid="default-thuid"):
+        user = self.create(openid=openid, status=status, thuid=thuid)
+        return user.pk
+
 # --- models ---
+
+
 class UserProfile(models.Model):
-    profile = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-    )
-    openid = models.CharField(max_length=64)
-    balance = models.IntegerField(default=0)
+    thuid = models.CharField(
+        max_length=64, default="default-thuid")  # thu身份验证到具体人
+    openid = models.CharField(
+        max_length=64, default="default-openid")  # 用openid确认微信用户
+    balance = models.IntegerField(default=0)  # 余额
     group = models.ManyToManyField("UserGroup", )
 
     class Status(models.IntegerChoices):
@@ -49,7 +55,8 @@ class UserProfile(models.Model):
         choices=Status.choices, default=Status.UNAUTHORIZED)
 
     def __str__(self) -> str:
-        return self.profile.get_username()
+        return self.openid
+    objects = UserProfileManager()
 
 
 class Room(models.Model):
