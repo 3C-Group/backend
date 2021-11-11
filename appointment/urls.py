@@ -14,7 +14,7 @@ urlpatterns = [
     #  乐器类型的管理
     path("manage/type/", views.manage_type, name="manage_type"),
     # 房间与乐器的关系管理
-    path("manage/inst-room/", views.manage_inst_to_room, name="manage_inst_room"),
+    path("manage/inst_room/", views.manage_inst_to_room, name="manage_inst_room"),
     # 用户组管理
     path("manage/usergroup/", views.manage_usergroup, name="manage_usergroup"),
 
