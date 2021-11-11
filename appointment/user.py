@@ -2,6 +2,10 @@ import json
 from django.core import serializers
 from .models import *
 
+STUDENT_PK = 1
+TEACHER_PK = 2
+OTHER_PK = 3
+
 
 def get_user_info():  # 获取所有房间的信息
     data = serializers.serialize(
@@ -42,6 +46,13 @@ def get_or_create_user(req):
         if userset.count() == 0:
             ret["userpk"] = UserProfile.objects.create_user(
                 openid, status, thuid)
+            user = UserProfile.objects.get(pk=ret["userpk"])
+            if status == UserProfile.Status.STUDENT:
+                studentgroup = UserGroup.objects.get(pk=STUDENT_PK)
+                user.group.add(studentgroup)
+            elif status == UserProfile.Status.STUDENT:
+                teachergroup = UserGroup.objects.get(pk=TEACHER_PK)
+                user.group.add(teachergroup)
         elif userset.count() == 1:
             ret["userpk"] = userset.get(0).pk
         ret["state"] = "success"
@@ -55,6 +66,9 @@ def get_or_create_user(req):
 
         if userset.count() == 0:
             ret["userpk"] = UserProfile.objects.create_user(openid, status)
+            user = UserProfile.objects.get(pk=ret["userpk"])
+            othergroup = UserGroup.objects.get(pk=OTHER_PK)
+            user.group.add(othergroup)
         elif userset.count() == 1:
             ret["userpk"] = userset[0].pk
         ret["state"] = "success"

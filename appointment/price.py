@@ -4,6 +4,7 @@ from .models import *
 
 
 DEFAULT_PRICE = 9999999
+MAX_PRICE = 9999999999
 
 # * 乐器类型的价格管理
 
@@ -84,3 +85,13 @@ def get_all_price_for_room(roompk):  # 获得所有用户组对该room的价格
         pricedata.append(priceinfo)
     json_data = json.dumps(pricedata, ensure_ascii=False)  # 转为json且避免乱码
     return json_data
+
+# def get_price(userpk, roompk, instpk):
+#    user = UserProfile.objects.get(pk = userpk)
+#    roomprice = MAX_PRICE
+#    instprice = MAX_PRICE
+#    for group in user.group_set:
+#        roomtp = get_or_create_room_price(group, roompk)
+#        roomprice = min(roomprice, roomprice)
+#
+#    return 0

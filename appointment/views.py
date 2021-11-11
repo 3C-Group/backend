@@ -75,6 +75,16 @@ def get_user(request):  # 获取所有用户的列表
             return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
 
+# def get_price(request):  # 获取（用户，乐器，房间）三元组的价格
+#    if request.method == "GET":
+#        try:
+#            req = json.loads(request.body)
+#            price = price_service(req["userpk"], req["instpk"], req["roompk"])
+#            return HttpResponse(price)
+#        except Exception as e:
+#            return HttpResponse(e, status=400)
+#    return HttpResponse('Method Not Allowed', status=405)
+
 # * MANAGE TYPE 乐器类型管理
 
 
@@ -174,6 +184,8 @@ def manage_usergroup(request):
         elif request.method == "DELETE":  # 删除用户组
             req = json.loads(request.body)
             ret = usergroup_service.delete_group(req["pk"])
+            if ret == "forbidden":  # 不能删除内置用户组
+                return HttpResponse("cannot delete built-in groups", status=403)
             # TODO: 检查是否存在对应的用户
             #            if ret == "order":
             #                return HttpResponse("related user exist", status=409)

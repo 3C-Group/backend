@@ -36,5 +36,6 @@ urlpatterns = [
     path("get_usergroup/", views.get_usergroup,
          name="get_usergroup"),  # 获取所有的用户组信息
     path("get_user/", views.get_user, name="get_user"),  # 获得所有用户信息
+    #    path("get_price/", views.get_price, name="get_price"),  # 获取（用户，房间，乐器）三元组的最低价格
 
 ]
