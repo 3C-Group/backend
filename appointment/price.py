@@ -5,6 +5,8 @@ from .models import *
 
 DEFAULT_PRICE = 9999999
 
+# * 乐器类型的价格管理
+
 
 def get_or_create_type_price(usergrouppk, insttypepk):  # 获取或创建一个type_price
     tp = InstrumentTypePrice.objects.filter(
@@ -37,6 +39,45 @@ def get_all_price_for_type(insttypepk):  # 获得所有用户组对该乐器类�
     for group in group_set:
         # 获取所有当前insttype与group的pair
         tp = get_or_create_type_price(group.pk, insttypepk)
+        priceinfo = {}
+        priceinfo["grouppk"] = group.pk
+        priceinfo["price"] = tp.price
+        pricedata.append(priceinfo)
+    json_data = json.dumps(pricedata, ensure_ascii=False)  # 转为json且避免乱码
+    return json_data
+
+
+# * 房间价格的管理
+def get_or_create_room_price(usergrouppk, roompk):  # 获取或创建一个room_price
+    tp = RoomPrice.objects.filter(group__pk=usergrouppk, room__pk=roompk)
+    if tp.count() == 1:
+        return tp[0]
+    elif tp.count() == 0:
+        tppk = RoomPrice.objects.create_room_price(
+            usergrouppk, roompk, DEFAULT_PRICE)
+        return RoomPrice.objects.get(pk=tppk)
+    else:
+        raise ValueError("Two room price conflict")
+
+
+def set_room_price(usergrouppk, roompk, price):  # 更新价格
+    tp = get_or_create_room_price(usergrouppk, roompk)
+    tp.price = price
+    tp.save()
+    return tp.pk
+
+
+def get_room_price(usergrouppk, roompk, price):
+    tp = get_or_create_room_price(usergrouppk, roompk)
+    return tp.price
+
+
+def get_all_price_for_room(roompk):  # 获得所有用户组对该room的价格
+    pricedata = []
+    group_set = UserGroup.objects.all()
+    for group in group_set:
+        tp = get_or_create_room_price(
+            group.pk, roompk)  # 获取所有当前room与group的pair
         priceinfo = {}
         priceinfo["grouppk"] = group.pk
         priceinfo["price"] = tp.price

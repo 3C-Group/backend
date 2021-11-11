@@ -26,7 +26,8 @@ urlpatterns = [
 
     # 乐器类型与用户价格的设置
     path("manage/type_price/", views.manage_type_price, name="manage_type_price"),
-
+    # 房间与用户价格的设置
+    path("manage/room_price/", views.manage_room_price, name="manage_room_price"),
 
     #  信息获取
     path("get_type/", views.get_type, name="get_type"),  # 获取所有的乐器类型信息

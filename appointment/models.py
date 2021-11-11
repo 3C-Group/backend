@@ -43,6 +43,13 @@ class InstrumentTypePriceManager(models.Manager):
         return typeprice.pk
 
 
+class RoomPriceManager(models.Manager):
+    def create_room_price(self, grouppk, roompk, price):
+        group = UserGroup.objects.get(pk=grouppk)
+        room = Room.objects.get(pk=roompk)
+        roomprice = self.create(group=group, room=room, price=price)
+        return roomprice.pk
+
 # --- models ---
 
 
@@ -164,6 +171,7 @@ class RoomPrice(models.Model):  # 房间价格
         "Room",
         on_delete=models.CASCADE,
     )
+    objects = RoomPriceManager()
 
 
 class InstrumentTypePrice(models.Model):  # 乐器类型的价格

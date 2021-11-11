@@ -217,7 +217,7 @@ def manage_user_to_group(request):
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
 
-# * 设置（用户组，乐器类型）的价格:
+# * 乐器类型价格:
 
 
 def manage_type_price(request):
@@ -230,6 +230,23 @@ def manage_type_price(request):
         elif request.method == "GET":
             req = json.loads(request.body)
             ret = price_service.get_all_price_for_type(req["insttypepk"])
+            return HttpResponse(ret)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
+# * 房间价格
+def manage_room_price(request):
+    try:
+        if request.method == "PUT":  # 设置（用户组，房间）的价格
+            req = json.loads(request.body)
+            ret = price_service.set_room_price(
+                req["usergrouppk"], req["roompk"], req["price"])
+            return HttpResponse(ret)
+        elif request.method == "GET":
+            req = json.loads(request.body)
+            ret = price_service.get_all_price_for_room(req["roompk"])
             return HttpResponse(ret)
     except Exception as e:
         return HttpResponse(e, status=400)
