@@ -59,3 +59,21 @@ def get_or_create_user(req):
             ret["userpk"] = userset[0].pk
         ret["state"] = "success"
         return ret
+
+
+def set_usergroup(userpk, usergrouppk):  # 设置用户到用户组
+    user = UserProfile.objects.get(pk=userpk)
+    if user.group.filter(pk=usergrouppk).count() > 0:  # 如果已经在用户组
+        return "exist"
+    usergroup = UserGroup.objects.get(pk=usergrouppk)
+    user.group.add(usergroup)
+    return "success"
+
+
+def unset_usergroup(userpk, usergrouppk):  # 取消用户从用户组
+    user = UserProfile.objects.get(pk=userpk)
+    if user.group.filter(pk=usergrouppk).count() == 0:  # 如果不在这个用户组
+        return "notexist"
+    usergroup = UserGroup.objects.get(pk=usergrouppk)
+    user.group.remove(usergroup)
+    return "success"

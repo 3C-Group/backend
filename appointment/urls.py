@@ -20,6 +20,9 @@ urlpatterns = [
     # 用户管理
     path("manage/user/", views.manage_user, name="manage_user"),
 
+    # 用户与用户组的关系管理
+    path("manage/user_to_group/", views.manage_user_to_group, name="manage_user_to_group"),     # 设置用户的用户组
+
     #  信息获取
     path("get_type/", views.get_type, name="get_type"),  # 获取所有的乐器类型信息
     path("get_inst/", views.get_inst, name="get_inst"),  # 获取所有的乐器信息

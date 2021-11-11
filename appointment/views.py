@@ -192,7 +192,29 @@ def manage_user(request):
             return HttpResponse(ret["userpk"])
     except Exception as e:
         return HttpResponse(e, status=400)
-    return HttpResponse('Method Not Allowed', status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+# * 设置用户与用户组的关系
+
+
+def manage_user_to_group(request):
+    try:
+        if request.method == "POST":  # 设置用户的用户组
+            req = json.loads(request.body)
+            ret = user_service.set_usergroup(req["userpk"], req["usergrouppk"])
+            if ret == "exist":
+                return HttpResponse("user already in this group", status=409)
+            return HttpResponse(ret)
+        elif request.method == "DELETE":  # 取消用户的用户组
+            req = json.loads(request.body)
+            ret = user_service.unset_usergroup(
+                req["userpk"], req["usergrouppk"])
+            if ret == "notexist":
+                return HttpResponse("user not in this group", status=409)
+            return HttpResponse(ret)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
 
 # +++++++++测试用+++++++++
 
