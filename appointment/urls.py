@@ -23,5 +23,5 @@ urlpatterns = [
     path("get_inst/", views.get_inst, name="get_inst"),  # 获取所有的乐器信息
     path("get_room/", views.get_room, name="get_room"),  # 获取所有的房间信息
     path("get_usergroup/", views.get_usergroup,
-         name="get_usergroup"),  # 获取所有的房间信息
+         name="get_usergroup"),  # 获取所有的用户组信息
 ]

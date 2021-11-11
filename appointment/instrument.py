@@ -40,6 +40,14 @@ def delete_inst(pk):  # 删除某一乐器
     return "success"
 
 
+def update_inst(req):
+    inst = Instrument.objects.get(pk=req["pk"])  # 尝试获取该乐器
+    if "name" in req:
+        inst.name = req["name"]
+    inst.save()
+    return "success"
+
+
 def add_inst_to_room(instpk, roompk):  # 使得某一个inst可以前往room
     inst = Instrument.objects.get(pk=instpk)
     if inst.room.filter(pk=roompk).count() >= 1:  # 如果该乐器已经可以前往该房间

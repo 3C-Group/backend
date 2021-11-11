@@ -31,3 +31,13 @@ def delete_room(pk):  # 删除某一房间
     # TODO: 考虑该房间如果有乐器，这些乐器应该怎么删除
     room.delete()
     return "success"
+
+
+def update_room(req):  # 修改房间信息
+    room = Room.objects.get(pk=req["pk"])  # 获取该房间
+    if "name" in req:
+        room.name = req["name"]
+    if "max_inst" in req:
+        room.max_inst = req["max_inst"]
+    room.save()
+    return "success"

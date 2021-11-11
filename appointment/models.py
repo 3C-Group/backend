@@ -35,9 +35,18 @@ class UserProfile(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
-    wxid = models.CharField(max_length=64)
+    openid = models.CharField(max_length=64)
     balance = models.IntegerField(default=0)
     group = models.ManyToManyField("UserGroup", )
+
+    class Status(models.IntegerChoices):
+        STUDENT = 1         # 24岁，是学生
+        TEACHER = 2         # 是老师
+        OTHER = 3           # 不知道是个啥，可能是邱宝？
+        UNAUTHORIZED = 100  # 未验证身份的用户
+
+    status = models.IntegerField(
+        choices=Status.choices, default=Status.UNAUTHORIZED)
 
     def __str__(self) -> str:
         return self.profile.get_username()
@@ -102,11 +111,11 @@ class Order(models.Model):
     paid = models.IntegerField(default=0)  # 实际支付的金额
 
     class Status(models.IntegerChoices):
-        UNPAID = 1  # 未支付
-        PAID = 2  # 已支付但未使用
+        UNPAID = 1     # 未支付
+        PAID = 2       # 已支付但未使用
         CANCELLED = 3  # 已取消 分两种情况 支付或未支付 支付后手动取消的要将付款返到余额里
-        FINISHED = 4  # 已完成 完成后不可再取消
-        OUTDATED = 5  # 已支付 但未使用 不可取消
+        FINISHED = 4   # 已完成 完成后不可再取消
+        OUTDATED = 5   # 已支付 但未使用 不可取消
 
     status = models.IntegerField(choices=Status.choices, default=Status.UNPAID)
 
@@ -166,9 +175,9 @@ class ForbiddenRoom(models.Model):  # 对于（用户组，房间，时间段）
     end_time = models.DateTimeField(default=datetime.datetime(1, 1, 1))
 
     class Status(models.IntegerChoices):
-        FIX = 1  # 维修中
+        FIX = 1       # 维修中
         ACTIVITY = 2  # 活动占用
-        OTHER = 100  # 其他
+        OTHER = 100   # 其他
 
     status = models.IntegerField(choices=Status.choices,
                                  default=Status.ACTIVITY)
