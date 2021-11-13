@@ -295,8 +295,10 @@ def manage_order(request):
         if request.method == "POST":
             req = json.loads(request.body)
             ret = order_service.create_order(req)
-            if ret == "forbidden":
-                return HttpResponse("not avaliable", status=409)
+            if ret == "room forbidden":
+                return HttpResponse(ret, status=403)
+            if ret == "room order conflict":
+                return HttpResponse(ret, status=409)
             return HttpResponse(ret)
         elif request.method == "GET":
             req = json.loads(request.body)

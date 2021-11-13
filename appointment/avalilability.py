@@ -11,7 +11,7 @@ def check_room_forbidden(userpk, roompk, begin, end):  # 检查时间段内是�
     user = UserProfile.objects.get(pk=userpk)
     groupset = [group.pk for group in user.group.all()]
     result = get_room_rule(groupset, roompk, begin, end)
-    if len(result) > 1:  # 如果长度大于1， 至少1个时间段无法获取
+    if len(result) > 1 or result[0]["type"] == "forbidden":  # 如果长度大于1， 至少1个时间段无法获取
         return True
     return False
 

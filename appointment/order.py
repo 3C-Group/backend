@@ -22,7 +22,7 @@ def create_order(req):
         return "room forbidden"
 
     if check_room_order(req["roompk"], begin_time, end_time):
-        return "order conflict"
+        return "room order conflict"
 
     # TODO: check inst
 
