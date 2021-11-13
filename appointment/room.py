@@ -50,17 +50,17 @@ def update_room(req):  # 修改房间信息
     return "success"
 
 
-def check_rule(usergrouppk, roompk, begin, end):  # 检查这一时间段是否有重合的禁用规则
+def check_rule(usergrouppk, roompk, begin, end):  # 检查这一时间段, 对于该room和usergroup, 是否有重合的禁用规则
     rule_set = ForbiddenRoom.objects.filter(
         group__pk=usergrouppk, room__pk=roompk)
     rule_set = rule_set.filter(Q(begin_time__range=(
-        begin, end - datetime.timedelta(minutes=1))) | Q(end_time__range=(begin + datetime.timedelta(minutes=1), end)))  # 筛选出起始时间段到此刻的结束
+        begin, end - datetime.timedelta(minutes=1))) | Q(end_time__range=(begin + datetime.timedelta(minutes=1), end)))  # 筛选和该时间段重合的rule
     if rule_set.count() > 1:
         return True
     return False
 
 
-def check_order(usergrouppk, roompk, begin, end):
+def check_order(usergrouppk, roompk, begin, end):  # 检查这一时间段，是否有关于该room, 与该usergroup相关的订单
     usergroup = UserGroup.objects.get(pk=usergrouppk)
     order_set = Order.objects.filter(room__pk=roompk)  # 筛选房间
     order_set = order_set.filter(
@@ -77,15 +77,16 @@ def set_room_forbidden(req):  # 设置房间禁用  [begin_time, end_time)
     begin_time = datetime.datetime.strptime(req["begin_time"], TIME_FORMAT)
     end_time = datetime.datetime.strptime(req["end_time"], TIME_FORMAT)
     if end_time <= begin_time:
-        raise ValueError("time length error")  # TODO
+        raise ValueError("time length error")  # 时间长度错误
 
-    if check_rule(req["usergrouppk"], req["roompk"], begin_time, end_time):
+    if check_rule(req["usergrouppk"], req["roompk"], begin_time, end_time):  # 检查是否有已重合的规则
         return "already forbidden"
 
+    # 检查是否有相关group与room的订单(unpaid and paid)
     if check_order(req["usergrouppk"], req["roompk"], begin_time, end_time):
         return "order conflict"
 
-    if req["status"] == 1:
+    if req["status"] == 1:  # 设置禁用的理由
         status = ForbiddenRoom.Status.FIX
     elif req["status"] == 2:
         status = ForbiddenRoom.Status.ACTIVITY

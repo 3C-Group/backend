@@ -274,6 +274,8 @@ def manage_room_price(request):
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
 
+# * 设置用户组与房间的特殊规则禁用
+
 
 def manage_room_use(request):
     try:
@@ -288,6 +290,8 @@ def manage_room_use(request):
     except Exception as e:
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
+
+# * 订单管理
 
 
 def manage_order(request):
@@ -307,6 +311,8 @@ def manage_order(request):
     except Exception as e:
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
+
+# 获取（用户，房间，时间段）内，房间的整体可用性
 
 
 def get_room_avalilability(request):
