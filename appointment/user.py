@@ -76,6 +76,8 @@ def get_or_create_user(req):
 
 
 def set_usergroup(userpk, usergrouppk):  # 设置用户到用户组
+    if usergrouppk == 1 or usergrouppk == 2 or usergrouppk == 3:
+        return "forbidden"
     user = UserProfile.objects.get(pk=userpk)
     if user.group.filter(pk=usergrouppk).count() > 0:  # 如果已经在用户组
         return "exist"
@@ -85,6 +87,8 @@ def set_usergroup(userpk, usergrouppk):  # 设置用户到用户组
 
 
 def unset_usergroup(userpk, usergrouppk):  # 取消用户从用户组
+    if usergrouppk == 1 or usergrouppk == 2 or usergrouppk == 3:
+        return "forbidden"
     user = UserProfile.objects.get(pk=userpk)
     if user.group.filter(pk=usergrouppk).count() == 0:  # 如果不在这个用户组
         return "notexist"
