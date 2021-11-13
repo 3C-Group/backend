@@ -1,10 +1,7 @@
 import json
-from django.core import serializers
 from .models import *
 
-
-DEFAULT_PRICE = 9999999
-MAX_PRICE = 9999999999
+DEFAULT_PRICE = -1
 
 # * 乐器类型的价格管理
 
@@ -19,7 +16,7 @@ def get_or_create_type_price(usergrouppk, insttypepk):  # 获取或创建一个t
             usergrouppk, insttypepk, DEFAULT_PRICE)
         return InstrumentTypePrice.objects.get(pk=tppk)
     else:
-        raise ValueError("Two type price conflict")
+        raise ValueError("Two insttype price conflict")
 
 
 def set_type_price(usergrouppk, insttypepk, price):  # 更新价格
@@ -86,12 +83,29 @@ def get_all_price_for_room(roompk):  # 获得所有用户组对该room的价格
     json_data = json.dumps(pricedata, ensure_ascii=False)  # 转为json且避免乱码
     return json_data
 
-# def get_price(userpk, roompk, instpk):
-#    user = UserProfile.objects.get(pk = userpk)
-#    roomprice = MAX_PRICE
-#    instprice = MAX_PRICE
-#    for group in user.group_set:
-#        roomtp = get_or_create_room_price(group, roompk)
-#        roomprice = min(roomprice, roomprice)
-#
-#    return 0
+
+def get_price(userpk, roompk, instpk):
+    user = UserProfile.objects.get(pk=userpk)
+    typepk = Instrument.objects.get(pk=instpk).type.pk
+
+    roomprice = DEFAULT_PRICE
+    typeprice = DEFAULT_PRICE
+
+    for group in user.group.all():
+        roomtp = get_or_create_room_price(group.pk, roompk)
+        if roomtp.price != DEFAULT_PRICE:
+            if roomprice == DEFAULT_PRICE:
+                roomprice = roomtp.price
+            else:
+                roomprice = min(roomprice, roomtp.price)
+
+        typetp = get_or_create_type_price(group.pk, typepk)
+        if typetp.price != DEFAULT_PRICE:
+            if typeprice == DEFAULT_PRICE:
+                typeprice = typetp.price
+            else:
+                typeprice = min(typeprice, typetp.price)
+
+    if roomprice == DEFAULT_PRICE or typeprice == DEFAULT_PRICE:
+        return -1
+    return roomprice + typeprice

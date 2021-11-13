@@ -75,15 +75,19 @@ def get_user(request):  # 获取所有用户的列表
             return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
 
-# def get_price(request):  # 获取（用户，乐器，房间）三元组的价格
-#    if request.method == "GET":
-#        try:
-#            req = json.loads(request.body)
-#            price = price_service(req["userpk"], req["instpk"], req["roompk"])
-#            return HttpResponse(price)
-#        except Exception as e:
-#            return HttpResponse(e, status=400)
-#    return HttpResponse('Method Not Allowed', status=405)
+
+def get_price(request):  # 获取（用户，乐器，房间）三元组的价格
+    if request.method == "GET":
+        try:
+            req = json.loads(request.body)
+            price = price_service.get_price(
+                req["userpk"], req["instpk"], req["roompk"])
+            if price == -1:  # 没有可用的价格规则
+                return HttpResponse("no valid price", status=202)
+            return HttpResponse(price)
+        except Exception as e:
+            return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
 
 # * MANAGE TYPE 乐器类型管理
 
