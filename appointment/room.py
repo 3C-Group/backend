@@ -60,6 +60,19 @@ def check_rule(usergrouppk, roompk, begin, end):  # 检查这一时间段是否�
     return False
 
 
+def check_order(usergrouppk, roompk, begin, end):
+    usergroup = UserGroup.objects.get(pk=usergrouppk)
+    order_set = Order.objects.filter(room__pk=roompk)  # 筛选房间
+    order_set = order_set.filter(
+        Q(status=Order.Status.UNPAID) | Q(status=Order.Status.PAID))  # 筛选unpaid, paid
+    order_set = order_set.filter(Q(begin_time__range=(
+        begin, end - datetime.timedelta(minutes=1))) | Q(end_time__range=(begin + datetime.timedelta(minutes=1), end)))  # 筛选时间
+    # 存在包括该usergroup的order
+    if order_set.filter(user__in=usergroup.userprofile_set.all()).count() > 0:
+        return True
+    return False
+
+
 def set_room_forbidden(req):  # 设置房间禁用  [begin_time, end_time)
     begin_time = datetime.datetime.strptime(req["begin_time"], TIME_FORMAT)
     end_time = datetime.datetime.strptime(req["end_time"], TIME_FORMAT)
@@ -69,7 +82,7 @@ def set_room_forbidden(req):  # 设置房间禁用  [begin_time, end_time)
     if check_rule(req["usergrouppk"], req["roompk"], begin_time, end_time):
         return "already forbidden"
 
-    if check_room_order(req["roompk"], begin_time, end_time):
+    if check_order(req["usergrouppk"], req["roompk"], begin_time, end_time):
         return "order conflict"
 
     if req["status"] == 1:

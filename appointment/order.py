@@ -7,7 +7,7 @@ from .avalilability import *
 TIME_FORMAT = '%Y/%m/%d %H:%M'
 
 
-def get_order(req):
+def get_order(req):  # TODO
     data = serializers.serialize("json", Order.objects.all())
     return data
 
