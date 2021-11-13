@@ -50,6 +50,27 @@ class RoomPriceManager(models.Manager):
         roomprice = self.create(group=group, room=room, price=price)
         return roomprice.pk
 
+
+class ForbiddenRoomManager(models.Manager):
+    def create_rule(self, grouppk, roompk, begin_time, end_time, status):
+        group = UserGroup.objects.get(pk=grouppk)
+        room = Room.objects.get(pk=roompk)
+        rule = self.create(
+            group=group, room=room, begin_time=begin_time, end_time=end_time, status=status)
+        return rule.pk
+
+
+class OrderManager(models.Manager):
+    def create_order(self, userpk, roompk, instpk, price,  begin_time, end_time):
+        user = UserProfile.objects.get(pk=userpk)
+        room = Room.objects.get(pk=roompk)
+        inst = Instrument.objects.get(pk=instpk)
+        status = Order.Status.UNPAID  # 默认未支付
+        order = self.create(user=user, room=room, inst=inst, status=status,
+                            begin_time=begin_time, end_time=end_time, price=price)
+        return order.pk
+
+
 # --- models ---
 
 
@@ -143,8 +164,9 @@ class Order(models.Model):
     status = models.IntegerField(choices=Status.choices, default=Status.UNPAID)
 
     def __str__(self) -> str:
-        return "{0} {1} {2}".format(self.user.profile.get_username(),
+        return "{0} {1} {2}".format(self.user.openid,
                                     self.inst.name, self.room.name)
+    objects = OrderManager()
 
 
 class Unavailability(models.Model):
@@ -205,7 +227,9 @@ class ForbiddenRoom(models.Model):  # 对于（用户组，房间，时间段）
         OTHER = 100   # 其他
 
     status = models.IntegerField(choices=Status.choices,
-                                 default=Status.ACTIVITY)
+                                 default=Status.FIX)
+
+    objects = ForbiddenRoomManager()
 
 
 class ForbiddenInstrument(models.Model):  # 对于（用户组，乐器，时间段），进行禁用
@@ -221,12 +245,12 @@ class ForbiddenInstrument(models.Model):  # 对于（用户组，乐器，时间
     end_time = models.DateTimeField(default=datetime.datetime(1, 1, 1))
 
     class Status(models.IntegerChoices):
-        ACTIVITY = 1  # 活动占用
-        FIX = 2  # 维修
+        FIX = 1  # 维修
+        ACTIVITY = 2  # 活动占用
         OTHER = 100  # 其他
 
     status = models.IntegerField(choices=Status.choices,
-                                 default=Status.ACTIVITY)
+                                 default=Status.FIX)
 
 
 # 检查占用：

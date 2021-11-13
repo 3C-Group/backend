@@ -1,7 +1,11 @@
 import json
 from django.core import serializers
 from .models import *
+from .avalilability import *
 from django.db.models import Q
+import datetime
+
+TIME_FORMAT = '%Y/%m/%d %H:%M'
 
 
 def get_room_info():  # 获取所有房间的信息
@@ -44,3 +48,37 @@ def update_room(req):  # 修改房间信息
         room.max_inst = req["max_inst"]
     room.save()
     return "success"
+
+
+def check_rule(usergrouppk, roompk, begin, end):  # 检查这一时间段是否有重合的禁用规则
+    rule_set = ForbiddenRoom.objects.filter(
+        group__pk=usergrouppk, room__pk=roompk)
+    rule_set = rule_set.filter(Q(begin_time__range=(
+        begin, end - datetime.timedelta(minutes=1))) | Q(end_time__range=(begin + datetime.timedelta(minutes=1), end)))  # 筛选出起始时间段到此刻的结束
+    if rule_set.count() > 1:
+        return True
+    return False
+
+
+def set_room_forbidden(req):  # 设置房间禁用  [begin_time, end_time)
+    begin_time = datetime.datetime.strptime(req["begin_time"], TIME_FORMAT)
+    end_time = datetime.datetime.strptime(req["end_time"], TIME_FORMAT)
+    if end_time <= begin_time:
+        raise ValueError("time length error")  # TODO
+
+    if check_rule(req["usergrouppk"], req["roompk"], begin_time, end_time):
+        return "already forbidden"
+
+    if check_room_order(req["roompk"], begin_time, end_time):
+        return "order conflict"
+
+    if req["status"] == 1:
+        status = ForbiddenRoom.Status.FIX
+    elif req["status"] == 2:
+        status = ForbiddenRoom.Status.ACTIVITY
+    else:
+        status = ForbiddenRoom.Status.OTHER
+
+    rulepk = ForbiddenRoom.objects.create_rule(
+        req["usergrouppk"], req["roompk"], begin_time, end_time, status)
+    return rulepk

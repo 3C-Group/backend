@@ -12,6 +12,8 @@ import appointment.insttype as type_service
 import appointment.usergroup as usergroup_service
 import appointment.user as user_service
 import appointment.price as price_service
+import appointment.order as order_service
+import appointment.avalilability as ava_service
 
 
 def index(request):
@@ -268,6 +270,51 @@ def manage_room_price(request):
             req = json.loads(request.body)
             ret = price_service.get_all_price_for_room(req["roompk"])
             return HttpResponse(ret)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
+def manage_room_use(request):
+    try:
+        if request.method == "POST":
+            req = json.loads(request.body)
+            ret = room_service.set_room_forbidden(req)
+            if ret == "order conflict":
+                return HttpResponse("order conflict", status=409)
+            elif ret == "already forbidden":
+                return HttpResponse("already partly forbidden", status=409)
+            return HttpResponse(ret)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
+def manage_order(request):
+    try:
+        if request.method == "POST":
+            req = json.loads(request.body)
+            ret = order_service.create_order(req)
+            if ret == "forbidden":
+                return HttpResponse("not avaliable", status=409)
+            return HttpResponse(ret)
+        elif request.method == "GET":
+            req = json.loads(request.body)
+            data = order_service.get_order(req)
+            return HttpResponse(data)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
+def get_room_avalilability(request):
+    try:
+        if request.method == "GET":
+            req = json.loads(request.body)
+            retdata = ava_service.get_room_avaliability(
+                req["userpk"], req["roompk"], req["begin_time"], req["end_time"])
+            json_data = json.dumps(retdata, ensure_ascii=False)
+            return HttpResponse(json_data)
     except Exception as e:
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)

@@ -19,6 +19,8 @@ urlpatterns = [
     path("manage/usergroup/", views.manage_usergroup, name="manage_usergroup"),
     # 用户管理
     path("manage/user/", views.manage_user, name="manage_user"),
+    # 管理订单
+    path("manage/order/", views.manage_order, name="manage_order"),
 
     # 用户与用户组的关系管理
     path("manage/user_to_group/", views.manage_user_to_group,
@@ -28,6 +30,8 @@ urlpatterns = [
     path("manage/type_price/", views.manage_type_price, name="manage_type_price"),
     # 房间与用户价格的设置
     path("manage/room_price/", views.manage_room_price, name="manage_room_price"),
+    # 房间对某些用户组关闭
+    path("manage/room_use/", views.manage_room_use, name="manage_room_use"),
 
     #  信息获取
     path("get_type/", views.get_type, name="get_type"),  # 获取所有的乐器类型信息
@@ -37,5 +41,6 @@ urlpatterns = [
          name="get_usergroup"),  # 获取所有的用户组信息
     path("get_user/", views.get_user, name="get_user"),  # 获得所有用户信息
     path("get_price/", views.get_price, name="get_price"),  # 获取（用户，房间，乐器）三元组的最低价格
-
+    path("get_room_avalilability/", views.get_room_avalilability,
+         name="get_room_avalilability"),  # 获取一段时间的房间可用性
 ]
