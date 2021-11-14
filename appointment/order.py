@@ -16,7 +16,7 @@ def create_order(req):  # 给定时间段， 房间， 乐器，用户： 创建
     begin_time = datetime.datetime.strptime(req["begin_time"], TIME_FORMAT)
     end_time = datetime.datetime.strptime(req["end_time"], TIME_FORMAT)
     if end_time <= begin_time:
-        raise ValueError("time length too short")
+        raise ValueError("invalid time length")
 
     # TODO: 检查乐器的占用与禁用
     # check_inst_forbidden
