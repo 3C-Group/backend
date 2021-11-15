@@ -16,7 +16,7 @@ def get_or_create_type_price(usergrouppk, insttypepk):  # 获取或创建一个t
             usergrouppk, insttypepk, DEFAULT_PRICE)
         return InstrumentTypePrice.objects.get(pk=tppk)
     else:
-        raise ValueError("Two insttype price conflict")
+        raise ValueError("Two insttype prices conflict")
 
 
 def set_type_price(usergrouppk, insttypepk, price):  # 更新价格
@@ -26,7 +26,7 @@ def set_type_price(usergrouppk, insttypepk, price):  # 更新价格
     return tp.pk
 
 
-def get_type_price(usergrouppk, insttypepk, price):
+def get_type_price(usergrouppk, insttypepk):
     tp = get_or_create_type_price(usergrouppk, insttypepk)
     return tp.price
 
@@ -55,7 +55,7 @@ def get_or_create_room_price(usergrouppk, roompk):  # 获取或创建一个room_
             usergrouppk, roompk, DEFAULT_PRICE)
         return RoomPrice.objects.get(pk=tppk)
     else:
-        raise ValueError("Two room price conflict")
+        raise ValueError("Two room prices conflict")
 
 
 def set_room_price(usergrouppk, roompk, price):  # 更新价格
@@ -65,7 +65,7 @@ def set_room_price(usergrouppk, roompk, price):  # 更新价格
     return tp.pk
 
 
-def get_room_price(usergrouppk, roompk, price):
+def get_room_price(usergrouppk, roompk):
     tp = get_or_create_room_price(usergrouppk, roompk)
     return tp.price
 
@@ -109,3 +109,18 @@ def get_price(userpk, roompk, instpk):
     if roomprice == DEFAULT_PRICE or typeprice == DEFAULT_PRICE:
         return -1
     return roomprice + typeprice
+    '''
+    totalprice = DEFAULT_PRICE
+    for group in user.group.all():
+        roomtp = get_or_create_room_price(group.pk, roompk)
+        typetp = get_or_create_type_price(group.pk, typepk)
+        if roomtp == DEFAULT_PRICE or typetp == DEFAULT_PRICE:
+            continue
+        if totalprice == DEFAULT_PRICE:
+            totalprice = roomtp.price + typetp.price
+        else:
+            totalprice = min(totalprice, roomtp.price + typetp.price)
+    if totalprice == DEFAULT_PRICE:
+        return -1
+    return totalprice
+    '''

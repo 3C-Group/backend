@@ -92,7 +92,8 @@ class UserProfile(models.Model):
         choices=Status.choices, default=Status.UNAUTHORIZED)
 
     def __str__(self) -> str:
-        return self.openid
+        return "{0} {1}".format(self.user.openid,
+                                self.user.thuid)
     objects = UserProfileManager()
 
 
@@ -144,15 +145,13 @@ class Order(models.Model):
     room = models.ForeignKey(
         "Room",
         on_delete=models.DO_NOTHING,
-        blank=True,
     )
     inst = models.ForeignKey(
         "Instrument",
         on_delete=models.DO_NOTHING,
-        blank=True,
     )
     price = models.IntegerField(default=0)  # 原价
-    paid = models.IntegerField(default=0)  # 实际支付的金额
+    paid = models.IntegerField(default=0)   # 实际支付的金额
 
     class Status(models.IntegerChoices):
         UNPAID = 1     # 未支付
@@ -164,8 +163,8 @@ class Order(models.Model):
     status = models.IntegerField(choices=Status.choices, default=Status.UNPAID)
 
     def __str__(self) -> str:
-        return "{0} {1} {2}".format(self.user.openid,
-                                    self.inst.name, self.room.name)
+        return "{0} {1} {2} {3}".format(self.user.openid, self.user.thuid,
+                                        self.inst.name, self.room.name)
     objects = OrderManager()
 
 

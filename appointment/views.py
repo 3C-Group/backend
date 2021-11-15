@@ -25,8 +25,8 @@ def index(request):
 def testview(request):
     return render(request, 'test.html', {})
 
-# * GET INFORMATION
 
+# * GET INFORMATION
 
 def get_type(request):  # 获取所有乐器的种类列表
     if request.method == "GET":
