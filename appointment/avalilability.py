@@ -20,8 +20,9 @@ def check_room_order(roompk, begin, end):  # 检查时间段内，订单有关�
 
 def get_room_order(roompk, begin, end) -> list:
     order_set = Order.objects.filter(room__pk=roompk)  # 筛选与该room有关order
-    order_set = order_set.filter(Q(begin_time__range=(
-        begin, end - datetime.timedelta(minutes=1))) | Q(end_time__range=(begin + datetime.timedelta(minutes=1), end)))  # 筛选出起始时间段到此刻的结束
+    qbegin = Q(begin_time__lt=end)  # 涉及到该时间段(begin, end)的order, 满足开始时间小于end
+    qend = Q(end_time__gt=begin)  # 涉及到该时间段(begin, end)的order, 满足结束时间大于begin
+    order_set = order_set.filter(qbegin & qend)
 
     timeset = set()
     timeset.add(begin)
@@ -76,8 +77,9 @@ def check_room_forbidden(userpk, roompk, begin, end):  # 检查时间段内是�
 
 def get_room_rule(usergrouppk_set, roompk, begin, end) -> list:
     rule_set = ForbiddenRoom.objects.filter(room__pk=roompk)
-    rule_set = rule_set.filter(Q(begin_time__range=(
-        begin, end - datetime.timedelta(minutes=1))) | Q(end_time__range=(begin + datetime.timedelta(minutes=1), end)))  # 筛选出起始时间段到此刻的结束
+    qbegin = Q(begin_time__lt=end)  # 涉及到该时间段(begin, end)的rule, 满足开始时间小于end
+    qend = Q(end_time__gt=begin)  # 涉及到该时间段(begin, end)的rule, 满足结束时间大于begin
+    rule_set = rule_set.filter(qbegin & qend)
     rule_set = rule_set.filter(group__pk__in=usergrouppk_set)
     # 筛选出与该用户组，房间以及时间段重叠的禁用规则
 
