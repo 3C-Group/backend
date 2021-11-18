@@ -53,8 +53,9 @@ def update_room(req):  # 修改房间信息
 def check_rule(usergrouppk, roompk, begin, end):  # 检查这一时间段, 对于该room和usergroup, 是否有重合的禁用规则
     rule_set = ForbiddenRoom.objects.filter(
         group__pk=usergrouppk, room__pk=roompk)
-    rule_set = rule_set.filter(Q(begin_time__range=(
-        begin, end - datetime.timedelta(minutes=1))) | Q(end_time__range=(begin + datetime.timedelta(minutes=1), end)))  # 筛选和该时间段重合的rule
+    qbegin = Q(begin_time__lt=end)  # 涉及到该时间段(begin, end)的order, 满足开始时间小于end
+    qend = Q(end_time__gt=begin)  # 涉及到该时间段(begin, end)的order, 满足结束时间大于begin
+    rule_set = rule_set.filter(qbegin & qend)  # 筛选和该时间段重合的rule
     if rule_set.count() > 1:
         return True
     return False
@@ -65,8 +66,9 @@ def check_order(usergrouppk, roompk, begin, end):  # 检查这一时间段，是
     order_set = Order.objects.filter(room__pk=roompk)  # 筛选房间
     order_set = order_set.filter(
         Q(status=Order.Status.UNPAID) | Q(status=Order.Status.PAID))  # 筛选unpaid, paid
-    order_set = order_set.filter(Q(begin_time__range=(
-        begin, end - datetime.timedelta(minutes=1))) | Q(end_time__range=(begin + datetime.timedelta(minutes=1), end)))  # 筛选时间
+    qbegin = Q(begin_time__lt=end)  # 涉及到该时间段(begin, end)的order, 满足开始时间小于end
+    qend = Q(end_time__gt=begin)  # 涉及到该时间段(begin, end)的order, 满足结束时间大于begin
+    order_set = order_set.filter(qbegin & qend)  # 筛选时间
     # 存在包括该usergroup的order
     if order_set.filter(user__in=usergroup.userprofile_set.all()).count() > 0:
         return True

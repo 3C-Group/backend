@@ -3,6 +3,8 @@ from django.core import serializers
 from .models import *
 from django.db.models import Q
 
+TIME_FORMAT = '%Y/%m/%d %H:%M'
+
 
 def get_inst_info():  # 获取所有乐器的信息
     data = serializers.serialize(
@@ -67,3 +69,53 @@ def remove_inst_from_room(instpk, roompk):  # 删除某一个inst可以前往roo
     room = Room.objects.get(pk=roompk)
     inst.room.remove(room)
     return "success"
+
+
+def check_rule(usergrouppk, instpk, begin, end):  # 检查这一时间段, 对于该inst和usergroup, 是否有重合的禁用规则
+    rule_set = ForbiddenInstrument.objects.filter(
+        group__pk=usergrouppk, inst__pk=instpk)
+    qbegin = Q(begin_time__lt=end)  # 涉及到该时间段(begin, end)的order, 满足开始时间小于end
+    qend = Q(end_time__gt=begin)  # 涉及到该时间段(begin, end)的order, 满足结束时间大于begin
+    rule_set = rule_set.filter(qbegin & qend)  # 筛选和该时间段重合的rule
+    if rule_set.count() > 1:
+        return True
+    return False
+
+
+def check_order(usergrouppk, instpk, begin, end):  # 检查这一时间段，是否有关于该inst, 与该usergroup相关的订单
+    usergroup = UserGroup.objects.get(pk=usergrouppk)
+    order_set = Order.objects.filter(inst__pk=instpk)  # 筛选乐器
+    order_set = order_set.filter(
+        Q(status=Order.Status.UNPAID) | Q(status=Order.Status.PAID))  # 筛选unpaid, paid
+    qbegin = Q(begin_time__lt=end)  # 涉及到该时间段(begin, end)的order, 满足开始时间小于end
+    qend = Q(end_time__gt=begin)  # 涉及到该时间段(begin, end)的order, 满足结束时间大于begin
+    order_set = order_set.filter(qbegin & qend)  # 筛选时间
+    # 存在包括该usergroup的order
+    if order_set.filter(user__in=usergroup.userprofile_set.all()).count() > 0:
+        return True
+    return False
+
+
+def set_inst_forbidden(req):  # 设置乐器禁用  [begin_time, end_time)
+    begin_time = datetime.datetime.strptime(req["begin_time"], TIME_FORMAT)
+    end_time = datetime.datetime.strptime(req["end_time"], TIME_FORMAT)
+    if end_time <= begin_time:
+        raise ValueError("time length error")  # 时间长度错误
+
+    if check_rule(req["usergrouppk"], req["instpk"], begin_time, end_time):  # 检查是否有已重合的规则
+        return "already forbidden"
+
+    # 检查是否有相关group与inst的订单(unpaid and paid)
+    if check_order(req["usergrouppk"], req["instpk"], begin_time, end_time):
+        return "order conflict"
+
+    if req["status"] == 1:  # 设置禁用的理由
+        status = ForbiddenInstrument.Status.FIX
+    elif req["status"] == 2:
+        status = ForbiddenInstrument.Status.ACTIVITY
+    else:
+        status = ForbiddenInstrument.Status.OTHER
+
+    rulepk = ForbiddenInstrument.objects.create_rule(
+        req["usergrouppk"], req["instpk"], begin_time, end_time, status)
+    return rulepk
