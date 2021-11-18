@@ -38,15 +38,17 @@ def delete_room(pk):  # 删除某一房间
     # 检查是否有1.即将支付，或者2.已支付但未使用的订单存在
     if room.order_set.filter(Q(status=Order.Status.UNPAID) | Q(status=Order.Status.PAID)).count() != 0:
         return "order"  # 如果当前存在这样的房间，不能删除
-    # TODO: 考虑该房间如果有乐器，这些乐器应该怎么删除
-    for inst in room.inst.all():
+    for inst in room.inst.all():  # is-this-right?
         remove_inst_from_room(inst.pk, pk)
     room.delete()
     return "success"
 
 
 def update_room(req):  # 修改房间信息
-    room = Room.objects.get(pk=req["pk"])  # 获取该房间
+    pk = req["pk"]
+    if pk == 1:
+        return "forbidden"
+    room = Room.objects.get(pk=pk)  # 获取该房间
     if "name" in req:
         room.name = req["name"]
     if "max_inst" in req:

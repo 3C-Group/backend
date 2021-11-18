@@ -26,6 +26,17 @@ def delete_group(pk):  # 删除某一用户组
     if pk == 1 or pk == 2 or pk == 3:  # 删除内置用户组
         return "forbidden"
     group = UserGroup.objects.get(pk=pk)  # 尝试获取该用户组
-    # TODO: 考虑如果有与用户组相关的用户存在，是否删除
+    group.userprofile_set.clear()  # is-this-right?
     group.delete()
+    return "success"
+
+
+def update_group(req):
+    pk = req["pk"]
+    if pk == 1 or pk == 2 or pk == 3:
+        return "forbidden"
+    group = UserGroup.objects.get(pk=pk)
+    if "name" in req:
+        group.name = req["name"]
+    group.save()
     return "success"

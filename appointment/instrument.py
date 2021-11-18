@@ -45,6 +45,9 @@ def delete_inst(pk):  # 删除某一乐器
 
 
 def update_inst(req):
+    pk = req["pk"]
+    if pk == 1:
+        return "forbidden"
     inst = Instrument.objects.get(pk=req["pk"])  # 尝试获取该乐器
     if "name" in req:
         inst.name = req["name"]

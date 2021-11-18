@@ -108,6 +108,12 @@ def manage_type(request):  # 新建乐器类型
             elif ret == False:
                 return HttpResponse("related instrument exist", status=409)
             return HttpResponse("success")
+        elif request.method == "PATCH":
+            req = json.loads(request.body)
+            ret = type_service.update_type(req)
+            if ret == "forbidden":
+                return HttpResponse("cannot update built-in type", status=403)
+            return HttpResponse(ret)
     except Exception as e:
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
@@ -131,7 +137,10 @@ def manage_inst(request):  # 管理乐器
             return HttpResponse("success")
         elif request.method == "PATCH":  # 改
             req = json.loads(request.body)
-            return HttpResponse(inst_service.update_inst(req))
+            ret = inst_service.update_inst(req)
+            if ret == "forbidden":
+                return HttpResponse("cannot update built-in inst", status=403)
+            return HttpResponse(ret)
     except Exception as e:
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
@@ -180,7 +189,10 @@ def manage_room(request):
             return HttpResponse("success")
         elif request.method == "PATCH":  # 改
             req = json.loads(request.body)
-            return HttpResponse(room_service.update_room(req))
+            ret = room_service.update_room(req)
+            if ret == "forbidden":
+                return HttpResponse("cannot update built-in room", status=403)
+            return HttpResponse(ret)
     except Exception as e:
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
@@ -197,11 +209,14 @@ def manage_usergroup(request):
             req = json.loads(request.body)
             ret = usergroup_service.delete_group(req["pk"])
             if ret == "forbidden":  # 不能删除内置用户组
-                return HttpResponse("cannot delete built-in groups", status=403)
-            # TODO: 检查是否存在对应的用户
-            #            if ret == "order":
-            #                return HttpResponse("related user exist", status=409)
+                return HttpResponse("cannot delete built-in group", status=403)
             return HttpResponse("success")
+        elif request.method == "PATCH":
+            req = json.loads(request.body)
+            ret = usergroup_service.update_group(req)
+            if ret == "forbidden":
+                return HttpResponse("cannot update built-in group", status=403)
+            return HttpResponse(ret)
     except Exception as e:
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
