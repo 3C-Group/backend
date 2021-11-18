@@ -4,6 +4,7 @@ from .models import *
 from .avalilability import *
 from django.db.models import Q
 import datetime
+from .instrument import remove_inst_from_room
 
 TIME_FORMAT = '%Y/%m/%d %H:%M'
 
@@ -31,11 +32,15 @@ def get_room_info():  # 获取所有房间的信息
 
 
 def delete_room(pk):  # 删除某一房间
+    if(pk == 1):
+        return "forbidden"
     room = Room.objects.get(pk=pk)  # 尝试获取该房间
     # 检查是否有1.即将支付，或者2.已支付但未使用的订单存在
     if room.order_set.filter(Q(status=Order.Status.UNPAID) | Q(status=Order.Status.PAID)).count() != 0:
         return "order"  # 如果当前存在这样的房间，不能删除
     # TODO: 考虑该房间如果有乐器，这些乐器应该怎么删除
+    for inst in room.inst.all():
+        remove_inst_from_room(inst.pk, pk)
     room.delete()
     return "success"
 

@@ -102,8 +102,10 @@ def manage_type(request):  # 新建乐器类型
             return HttpResponse(typepk)
         elif request.method == "DELETE":  # 删除乐器类型
             req = json.loads(request.body)
-            flag = type_service.delete_type(req["pk"])
-            if flag == False:
+            ret = type_service.delete_type(req["pk"])
+            if ret == "forbidden":
+                return HttpResponse("cannot delete built-in type", status=403)
+            elif ret == False:
                 return HttpResponse("related instrument exist", status=409)
             return HttpResponse("success")
     except Exception as e:
@@ -122,7 +124,9 @@ def manage_inst(request):  # 管理乐器
         elif request.method == "DELETE":  # 删除乐器类型
             req = json.loads(request.body)
             ret = inst_service.delete_inst(req["pk"])
-            if ret == "order":
+            if ret == "forbidden":
+                return HttpResponse("cannot delete built-in inst", status=403)
+            elif ret == "order":
                 return HttpResponse("related order exist", status=409)
             return HttpResponse("success")
         elif request.method == "PATCH":  # 改
@@ -169,7 +173,9 @@ def manage_room(request):
         elif request.method == "DELETE":  # 删除房间
             req = json.loads(request.body)
             ret = room_service.delete_room(req["pk"])
-            if ret == "order":
+            if ret == "forbidden":
+                return HttpResponse("cannot delete built-in room", status=403)
+            elif ret == "order":
                 return HttpResponse("related order exist", status=409)
             return HttpResponse("success")
         elif request.method == "PATCH":  # 改
@@ -299,9 +305,9 @@ def manage_order(request):
         if request.method == "POST":
             req = json.loads(request.body)
             ret = order_service.create_order(req)
-            if ret == "room forbidden":
+            if ret == "room forbidden" or ret == "inst forbidden":
                 return HttpResponse(ret, status=403)
-            if ret == "room order conflict":
+            if ret == "room order conflict" or ret == "inst order conflict":
                 return HttpResponse(ret, status=409)
             return HttpResponse(ret)
         elif request.method == "GET":

@@ -34,6 +34,8 @@ def get_inst_info():  # 获取所有乐器的信息
 
 
 def delete_inst(pk):  # 删除某一乐器
+    if(pk == 1):
+        return "forbidden"
     inst = Instrument.objects.get(pk=pk)  # 尝试获取该乐器
     # 检查是否有1.即将支付，或者2.已支付但未使用的订单存在
     if inst.order_set.filter(Q(status=Order.Status.UNPAID) | Q(status=Order.Status.PAID)).count() != 0:

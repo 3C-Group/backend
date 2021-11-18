@@ -21,6 +21,8 @@ def get_inst_type_info():  # 获取所有乐器类型的信息
     return json_data
 
 def delete_type(pk):  # 删除某一乐器类型
+    if(pk == 1):
+        return "forbidden"
     type = InstrumentType.objects.get(pk=pk)  # 尝试获取该乐器类型
     if type.instrument_set.count() != 0:  # 检查是否有该类的乐器存在
         return False  # 如果当前存在该类型乐器，不能删除
