@@ -38,7 +38,7 @@ def delete_room(pk):  # 删除某一房间
     # 检查是否有1.即将支付，或者2.已支付但未使用的订单存在
     if room.order_set.filter(Q(status=Order.Status.UNPAID) | Q(status=Order.Status.PAID)).count() != 0:
         return "order"  # 如果当前存在这样的房间，不能删除
-    for inst in room.inst.all():  # is-this-right?
+    for inst in room.instrument_set.all():
         remove_inst_from_room(inst.pk, pk)
     room.delete()
     return "success"
