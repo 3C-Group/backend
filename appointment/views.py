@@ -334,9 +334,9 @@ def manage_order(request):
         if request.method == "POST":
             req = json.loads(request.body)
             ret = order_service.create_order(req)
-            if ret == "room forbidden" or ret == "inst forbidden":
+            if ret == "room forbidden" or ret == "inst forbidden" or ret == "no permission to use":
                 return HttpResponse(ret, status=403)
-            if ret == "room order conflict" or ret == "inst order conflict":
+            if ret == "room order conflict" or ret == "inst order conflict" or ret == "inst not in the room":
                 return HttpResponse(ret, status=409)
             return HttpResponse(ret)
         elif request.method == "GET":
