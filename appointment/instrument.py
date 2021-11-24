@@ -55,9 +55,13 @@ def update_inst(req):
     return "success"
 
 
+def check_inst_in_room(instpk, roompk):  # 检查该乐器是否可以前往该房间
+    return Instrument.objects.get(pk=instpk).room.filter(pk=roompk).count() >= 1
+
+
 def add_inst_to_room(instpk, roompk):  # 使得某一个inst可以前往room
     inst = Instrument.objects.get(pk=instpk)
-    if inst.room.filter(pk=roompk).count() >= 1:  # 如果该乐器已经可以前往该房间
+    if check_inst_in_room(instpk, roompk):  # 如果该乐器已经可以前往该房间
         return "exist"
     room = Room.objects.get(pk=roompk)
     inst.room.add(room)
@@ -66,7 +70,7 @@ def add_inst_to_room(instpk, roompk):  # 使得某一个inst可以前往room
 
 def remove_inst_from_room(instpk, roompk):  # 删除某一个inst可以前往room的关系
     inst = Instrument.objects.get(pk=instpk)
-    if inst.room.filter(pk=roompk).count() == 0:  # 如果该乐器本来就不能前往该房间
+    if not check_inst_in_room(instpk, roompk):  # 如果该乐器本来就不能前往该房间
         return "notexist"
 #    if Order.objects.all().filter(room=roompk,inst=instpk).count() == 0:  #存在对应的订单
 #        return "related order exist"

@@ -4,6 +4,7 @@ from django.core import serializers
 from .models import *
 from .price import get_price
 from .avalilability import *
+from .instrument import check_inst_in_room
 
 TIME_FORMAT = '%Y/%m/%d %H:%M'  # 时间格式
 
@@ -45,6 +46,13 @@ def create_order(req):  # 给定时间段， 房间， 乐器，用户： 创建
     if end_time <= begin_time:
         raise ValueError("invalid time length")
 
+    price = get_price(req["userpk"], req["roompk"], req["instpk"])
+    if price == -1:
+        return "no permission to use"
+
+    if not check_inst_in_room(req["instpk"], req["roompk"]):
+        return "instrument not in the room"
+
     if check_inst_forbidden(req["userpk"], req["instpk"], begin_time, end_time):
         return "inst forbidden"
 
@@ -56,8 +64,6 @@ def create_order(req):  # 给定时间段， 房间， 乐器，用户： 创建
 
     if check_room_order(req["roompk"], begin_time, end_time):
         return "room order conflict"
-
-    price = get_price(req["userpk"], req["roompk"], req["instpk"])
 
     orderpk = Order.objects.create_order(
         req["userpk"], req["roompk"], req["instpk"], price, begin_time, end_time)
