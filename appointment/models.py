@@ -1,9 +1,11 @@
 import datetime
 from django.conf import settings
 from django.db import models
-
+TIME_FORMAT = '%Y/%m/%d %H:%M'  # 时间格式
 
 # --- managers ---
+
+
 class TypeManager(models.Manager):
     def create_type(self, name):
         type = self.create(name=name)
@@ -161,6 +163,30 @@ class Order(models.Model):
         OUTDATED = 5   # 已支付 但未使用 不可取消
 
     status = models.IntegerField(choices=Status.choices, default=Status.UNPAID)
+
+    def get_dict(self) -> dict:  # 返回格式化后的dict
+        item_data = {}
+        item_data["pk"] = self.pk
+        item_data["begin_time"] = datetime.datetime.strftime(
+            self.begin_time, TIME_FORMAT)
+        item_data["end_time"] = datetime.datetime.strftime(
+            self.end_time, TIME_FORMAT)
+        item_data["userpk"] = self.user.pk
+        item_data["roompk"] = self.room.pk
+        item_data["instpk"] = self.inst.pk
+        item_data["price"] = self.price
+        item_data["paid"] = self.paid
+        if self.status == self.Status.UNPAID:
+            item_data["status"] = "UNPAID"
+        elif self.status == self.Status.PAID:
+            item_data["status"] = "PAID"
+        elif self.status == self.Status.CANCELLED:
+            item_data["status"] = "CANCELLED"
+        elif self.status == self.Status.FINISHED:
+            item_data["status"] = self.Status.FINISHED
+        elif self.status == self.Status.OUTDATED:
+            item_data["status"] = "OUTDATED"
+        return item_data
 
     def __str__(self) -> str:
         return "{0} {1} {2} {3}".format(self.user.openid, self.user.thuid,

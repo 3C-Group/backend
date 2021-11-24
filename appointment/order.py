@@ -28,10 +28,10 @@ def get_order(req):  # TODO
             Qset.add(Q(end_time__lte=end_time))
     if len(Qset) == 0:
         return "not found"
-    Order.objects.filter(reduce(lambda x, y: x & y, Qset))
-    data = serializers.serialize(
-        "json", Order.objects.filter(reduce(lambda x, y: x & y, Qset))) # need more formatting
-    return data
+    data = Order.objects.filter(reduce(lambda x, y: x & y, Qset))
+    ret_data = [item.get_dict() for item in data]  # 格式化
+    json_data = json.dumps(ret_data, ensure_ascii=False)
+    return json_data
 
 
 def get_all_order(req):  # for test only

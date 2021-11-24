@@ -341,7 +341,7 @@ def manage_order(request):
             return HttpResponse(ret)
         elif request.method == "GET":
             req = json.loads(request.body)
-            data = order_service.get_all_order(req)
+            data = order_service.get_order(req)
             return HttpResponse(data)
     except Exception as e:
         return HttpResponse(e, status=400)
