@@ -79,7 +79,7 @@ def get_user(request):  # 获取所有用户的列表
 
 
 def get_price(request):  # 获取（用户，乐器，房间）三元组的价格
-    if request.method == "GET":
+    if request.method == "POST":
         try:
             req = json.loads(request.body)
             price = price_service.get_price(
@@ -363,7 +363,7 @@ def manage_order(request):
 
 def get_room_avalilability(request):
     try:
-        if request.method == "GET":
+        if request.method == "POST":
             req = json.loads(request.body)
             retdata = ava_service.get_room_avaliability(
                 req["userpk"], req["roompk"], req["begin_time"], req["end_time"])
