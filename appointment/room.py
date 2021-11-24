@@ -52,7 +52,7 @@ def check_rule(usergrouppk, roompk, begin, end):  # 检查这一时间段, 对�
     qbegin = Q(begin_time__lt=end)  # 涉及到该时间段(begin, end)的order, 满足开始时间小于end
     qend = Q(end_time__gt=begin)  # 涉及到该时间段(begin, end)的order, 满足结束时间大于begin
     rule_set = rule_set.filter(qbegin & qend)  # 筛选和该时间段重合的rule
-    if rule_set.count() > 1:
+    if rule_set.count() > 0:
         return True
     return False
 

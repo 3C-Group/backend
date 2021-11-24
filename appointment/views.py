@@ -296,8 +296,8 @@ def manage_type_price(request):
                 req["usergrouppk"], req["insttypepk"], req["price"])
             return HttpResponse(ret)
         elif request.method == "GET":
-            req = json.loads(request.body)
-            ret = price_service.get_all_price_for_type(req["insttypepk"])
+            typepk = request.GET.get("insttypepk")
+            ret = price_service.get_all_price_for_type(typepk)
             return HttpResponse(ret)
     except Exception as e:
         return HttpResponse(e, status=400)
@@ -313,8 +313,8 @@ def manage_room_price(request):
                 req["usergrouppk"], req["roompk"], req["price"])
             return HttpResponse(ret)
         elif request.method == "GET":
-            req = json.loads(request.body)
-            ret = price_service.get_all_price_for_room(req["roompk"])
+            roompk = request.GET.get("roompk")
+            ret = price_service.get_all_price_for_room(roompk)
             return HttpResponse(ret)
     except Exception as e:
         return HttpResponse(e, status=400)
