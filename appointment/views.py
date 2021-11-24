@@ -96,7 +96,7 @@ def get_room_for_type(request):
     if request.method == "POST":  # 获取可用的房间
         try:
             req = json.loads(request.body)
-            data = ava_service.get_room_for_type(req)
+            data = type_service.get_room_for_type(req)
             return HttpResponse(data)
         except Exception as e:
             return HttpResponse(e, status=400)

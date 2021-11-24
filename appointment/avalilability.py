@@ -132,22 +132,22 @@ def get_room_avaliability(userpk, roompk, begin_time, end_time):
 
     # 搜集相关禁用规则
     rule_set = ForbiddenRoom.objects.filter(room__pk=roompk)
-    rule_set = rule_set.filter(Q(begin_time__range=(
-        begin, end - datetime.timedelta(minutes=1))) | Q(end_time__range=(begin + datetime.timedelta(minutes=1), end)))  # 筛选出起始时间段到此刻的结束
+    qbegin = Q(begin_time__lt=end)  # 涉及到该时间段(begin, end)的rule, 满足开始时间小于end
+    qend = Q(end_time__gt=begin)  # 涉及到该时间段(begin, end)的rule, 满足结束时间大于begin
+    rule_set = rule_set.filter(qbegin & qend)
     rule_set = rule_set.filter(group__pk__in=usergrouppk_set)
 
     # 搜集相关订单
     order_set = Order.objects.filter(room__pk=roompk)  # 筛选房间
     order_set = order_set.filter(
         Q(status=Order.Status.UNPAID) | Q(status=Order.Status.PAID))  # 筛选unpaid, paid
-    order_set = order_set.filter(Q(begin_time__range=(
-        begin, end - datetime.timedelta(minutes=1))) | Q(end_time__range=(begin + datetime.timedelta(minutes=1), end)))  # 筛选时间   order_set = Order
+    order_set = order_set.filter(qbegin & qend)
 
     timeset = set()  # 搜集时间戳
     timeset.add(begin)
     timeset.add(end)
     for rule in rule_set.all():
-        if rule.begin_time >= begin and rule.begin_time >= end:
+        if rule.begin_time >= begin and rule.begin_time <= end:
             timeset.add(rule.begin_time)
         if rule.end_time >= begin and rule.end_time <= end:
             timeset.add(rule.end_time)
@@ -165,7 +165,7 @@ def get_room_avaliability(userpk, roompk, begin_time, end_time):
         ststr = datetime.datetime.strftime(st, TIME_FORMAT)
         ed = timeset[i+1]
         rules = rule_set.filter(begin_time__lte=st, end_time__gte=ed)  # 筛选时间段
-        if rules.count() == len(usergrouppk_set):  # 检查时间段是否被禁用, 优先展示被禁用的情况
+        if rules.count() >= len(usergrouppk_set):  # 检查时间段是否被禁用, 优先展示被禁用的情况
             if rules.filter(status=ForbiddenRoom.Status.FIX).count() > 0:  # 优先展示维修中
                 stamplist.append(
                     {"time": ststr, "type": "forbidden", "status": int(ForbiddenRoom.Status.FIX)})
@@ -275,7 +275,7 @@ def get_inst_rule(usergrouppk_set, instpk, begin, end) -> list:
     timeset.add(begin)
     timeset.add(end)
     for rule in rule_set.all():
-        if rule.begin_time >= begin and rule.begin_time >= end:
+        if rule.begin_time >= begin and rule.begin_time <= end:
             timeset.add(rule.begin_time)
         if rule.end_time >= begin and rule.end_time <= end:
             timeset.add(rule.end_time)
@@ -323,8 +323,9 @@ def get_inst_avaliability(userpk, instpk, begin_time, end_time):
 
     # 搜集相关禁用规则
     rule_set = ForbiddenInstrument.objects.filter(inst__pk=instpk)
-    rule_set = rule_set.filter(Q(begin_time__range=(
-        begin, end - datetime.timedelta(minutes=1))) | Q(end_time__range=(begin + datetime.timedelta(minutes=1), end)))  # 筛选出起始时间段到此刻的结束
+    qbegin = Q(begin_time__lt=end)  # 涉及到该时间段(begin, end)的rule, 满足开始时间小于end
+    qend = Q(end_time__gt=begin)  # 涉及到该时间段(begin, end)的rule, 满足结束时间大于begin
+    rule_set = rule_set.filter(qbegin & qend)
     rule_set = rule_set.filter(group__pk__in=usergrouppk_set)
 
     # 搜集相关订单
@@ -338,7 +339,7 @@ def get_inst_avaliability(userpk, instpk, begin_time, end_time):
     timeset.add(begin)
     timeset.add(end)
     for rule in rule_set.all():
-        if rule.begin_time >= begin and rule.begin_time >= end:
+        if rule.begin_time >= begin and rule.begin_time <= end:
             timeset.add(rule.begin_time)
         if rule.end_time >= begin and rule.end_time <= end:
             timeset.add(rule.end_time)
@@ -356,7 +357,7 @@ def get_inst_avaliability(userpk, instpk, begin_time, end_time):
         ststr = datetime.datetime.strftime(st, TIME_FORMAT)
         ed = timeset[i+1]
         rules = rule_set.filter(begin_time__lte=st, end_time__gte=ed)  # 筛选时间段
-        if rules.count() == len(usergrouppk_set):  # 检查时间段是否被禁用, 优先展示被禁用的情况
+        if rules.count() >= len(usergrouppk_set):  # 检查时间段是否被禁用, 优先展示被禁用的情况
             if rules.filter(status=ForbiddenInstrument.Status.FIX).count() > 0:  # 优先展示维修中
                 stamplist.append(
                     {"time": ststr, "type": "forbidden", "status": int(ForbiddenInstrument.Status.FIX)})
