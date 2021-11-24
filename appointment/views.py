@@ -85,11 +85,25 @@ def get_price(request):  # 获取（用户，乐器，房间）三元组的价�
             price = price_service.get_price(
                 req["userpk"], req["instpk"], req["roompk"])
             if price == -1:  # 没有可用的价格规则
-                return HttpResponse("no valid price", status=202)
+                return HttpResponse("no valid price", status=406)
             return HttpResponse(price)
         except Exception as e:
             return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
+
+
+def get_order(request):
+    if request.method == "POST":
+        try:
+            req = json.loads(request.body)
+            data = order_service.get_order(req)
+            if data == "not found":
+                return HttpResponse("no such order", status=404)
+            return HttpResponse(data)
+        except Exception as e:
+            return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
 
 # * MANAGE TYPE 乐器类型管理
 
@@ -327,7 +341,7 @@ def manage_order(request):
             return HttpResponse(ret)
         elif request.method == "GET":
             req = json.loads(request.body)
-            data = order_service.get_order(req)
+            data = order_service.get_all_order(req)
             return HttpResponse(data)
     except Exception as e:
         return HttpResponse(e, status=400)

@@ -43,4 +43,5 @@ urlpatterns = [
     path("get_price/", views.get_price, name="get_price"),  # 获取（用户，房间，乐器）三元组的最低价格
     path("get_room_avalilability/", views.get_room_avalilability,
          name="get_room_avalilability"),  # 获取一段时间的房间可用性
+    path("get_order/", views.get_order, name="get_order"),  # 获取所有的订单信息
 ]
