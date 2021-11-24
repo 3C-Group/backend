@@ -51,7 +51,7 @@ def create_order(req):  # 给定时间段， 房间， 乐器，用户： 创建
         return "no permission to use"
 
     if not check_inst_in_room(req["instpk"], req["roompk"]):
-        return "instrument not in the room"
+        return "inst not in the room"
 
     if check_inst_forbidden(req["userpk"], req["instpk"], begin_time, end_time):
         return "inst forbidden"

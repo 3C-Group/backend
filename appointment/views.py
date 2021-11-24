@@ -92,6 +92,17 @@ def get_price(request):  # 获取（用户，乐器，房间）三元组的价�
     return HttpResponse('Method Not Allowed', status=405)
 
 
+def get_room_for_type(request):
+    if request.method == "POST":  # 获取可用的房间
+        try:
+            req = json.loads(request.body)
+            data = ava_service.get_room_for_type(req)
+            return HttpResponse(data)
+        except Exception as e:
+            return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
 def get_order(request):
     if request.method == "POST":
         try:
