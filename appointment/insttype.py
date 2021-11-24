@@ -4,16 +4,9 @@ from .models import *
 
 
 def get_inst_type_info():  # 获取所有乐器类型的信息
-    data = serializers.serialize(
-        "python", InstrumentType.objects.all())  # 返回dict格式的objects all
+    data = InstrumentType.objects.all()  # 返回dict格式的objects all
 
-    typedata = []
-    for type in data:  # 统计数量，乐器信息的详情信息
-        typeinfo = {}
-        typeinfo["pk"] = type["pk"]
-        typeinfo["name"] = type["fields"]["name"]
-        typedata.append(typeinfo)
-
+    typedata = [tp.get_dict() for tp in data]
     retdata = {}
     retdata["typenum"] = len(data)  # 统计数量
     retdata["data"] = typedata  # 乐器类型的详情信息

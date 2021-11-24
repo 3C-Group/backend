@@ -4,16 +4,9 @@ from .models import *
 
 
 def get_group_info():  # 获取所有房间的信息
-    data = serializers.serialize(
-        "python", UserGroup.objects.all())  # 返回dict格式的objects all
+    data = UserGroup.objects.all()  # 返回dict格式的objects all
 
-    groupdata = []
-    for group in data:  # 统计数量，房间信息的详情信息
-        groupinfo = {}
-        groupinfo["pk"] = group["pk"]
-        groupinfo["name"] = group["fields"]["name"]
-        groupdata.append(groupinfo)
-
+    groupdata = [group.get_dict() for group in data]
     retdata = {}
     retdata["groupnum"] = len(data)  # 统计数量
     retdata["data"] = groupdata  # 房间的详情信息

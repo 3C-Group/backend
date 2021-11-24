@@ -5,6 +5,9 @@ TIME_FORMAT = '%Y/%m/%d %H:%M'  # 时间格式
 
 # --- managers ---
 
+# get_dict : 为了综合浏览所有信息时的格式化
+# TODO： get_detail : 获取某个模型的完全详情信息
+
 
 class TypeManager(models.Manager):
     def create_type(self, name):
@@ -93,6 +96,23 @@ class UserProfile(models.Model):
     status = models.IntegerField(
         choices=Status.choices, default=Status.UNAUTHORIZED)
 
+    def get_dict(self):
+        info = {}
+        info["pk"] = self.pk
+        info["balance"] = self.balance
+        info["usergroup"] = [group.pk for group in self.group.all()]
+        if self.status == self.Status.STUDENT:
+            info["status"] = "STUDENT"
+        elif self.status == self.Status.TEACHER:
+            info["status"] = "TEACHER"
+        elif self.status == self.Status.OTHER:
+            info["status"] = "OTHER"
+        else:
+            info["status"] = "UNAUTHORIZED"
+        info["openid"] = self.openid
+        info["thuid"] = self.thuid
+        return info
+
     def __str__(self) -> str:
         return "{0} {1}".format(self.user.openid,
                                 self.user.thuid)
@@ -107,6 +127,15 @@ class Room(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    def get_dict(self) -> dict:
+        roominfo = {}
+        roominfo["pk"] = self.pk
+        roominfo["name"] = self.name
+        roominfo["max_inst"] = self.max_inst
+        roominfo["inst"] = [inst.pk for inst in Room.objects.get(
+            pk=self.pk).instrument_set.all()]  # 所有可到访的乐器
+        return roominfo
 
     objects = RoomManager()
 
@@ -125,6 +154,17 @@ class Instrument(models.Model):
     def __str__(self) -> str:
         return self.name
 
+    def get_dict(self) -> dict:
+        instinfo = {}
+        instinfo["pk"] = self.pk
+        instinfo["name"] = self.name
+        instinfo["typepk"] = self.type.pk
+        instinfo["typename"] = InstrumentType.objects.get(
+            pk=instinfo["typepk"]).name  # 获取该乐器对应的乐器类型的名称
+        instinfo["roompk"] = [rm.pk for rm in self.room.all()]
+        instinfo["roomnum"] = len(instinfo["roompk"])
+        return instinfo
+
     objects = InstManager()
 
 
@@ -133,6 +173,12 @@ class InstrumentType(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    def get_dict(self) -> dict:
+        typeinfo = {}
+        typeinfo["pk"] = self.pk
+        typeinfo["name"] = self.name
+        return typeinfo
 
     objects = TypeManager()
 
@@ -204,6 +250,12 @@ class UserGroup(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    def get_dict(self) -> dict:
+        info = {}
+        info["pk"] = self.pk
+        info["name"] = self.name
+        return info
 
     objects = UserGroupManager()
 

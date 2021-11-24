@@ -339,9 +339,9 @@ def manage_order(request):
             if ret == "room order conflict" or ret == "inst order conflict" or ret == "inst not in the room":
                 return HttpResponse(ret, status=409)
             return HttpResponse(ret)
-        elif request.method == "GET":
+        elif request.method == "GET":  # TODO: only for test
             req = json.loads(request.body)
-            data = order_service.get_order(req)
+            data = order_service.get_all_order(req)
             return HttpResponse(data)
     except Exception as e:
         return HttpResponse(e, status=400)

@@ -10,19 +10,8 @@ TIME_FORMAT = '%Y/%m/%d %H:%M'
 
 
 def get_room_info():  # 获取所有房间的信息
-    data = serializers.serialize(
-        "python", Room.objects.all())  # 返回dict格式的objects all
-
-    roomdata = []
-    for room in data:  # 统计数量，房间信息的详情信息
-        roominfo = {}
-        roominfo["pk"] = room["pk"]
-        roominfo["name"] = room["fields"]["name"]
-        roominfo["max_inst"] = room["fields"]["max_inst"]
-        roominfo["inst"] = [inst.pk for inst in Room.objects.get(
-            pk=room["pk"]).instrument_set.all()]  # 所有可到访的乐器
-        roomdata.append(roominfo)
-
+    data = Room.objects.all()  # 返回dict格式的objects all
+    roomdata = [room.get_dict() for room in data]
     retdata = {}
     retdata["roomnum"] = len(data)  # 统计数量
     retdata["data"] = roomdata  # 房间的详情信息

@@ -8,19 +8,9 @@ OTHER_PK = 3
 
 
 def get_user_info():  # 获取所有房间的信息
-    data = serializers.serialize(
-        "python", UserProfile.objects.all())  # 返回dict格式的objects all
+    data = UserProfile.objects.all()  # 返回dict格式的objects all
 
-    userdata = []
-    for user in data:  # 统计数量，房间信息的详情信息
-        userinfo = {}
-        userinfo["pk"] = user["pk"]
-        userinfo["balance"] = user["fields"]["balance"]
-        userinfo["usergroup"] = user["fields"]["group"]
-        userinfo["status"] = user["fields"]["status"]
-        userinfo["openid"] = user["fields"]["openid"]
-        userinfo["thuid"] = user["fields"]["thuid"]
-        userdata.append(userinfo)
+    userdata = [user.get_dict() for user in data]
 
     json_data = json.dumps(userdata, ensure_ascii=False)  # 转为json且避免乱码
     return json_data

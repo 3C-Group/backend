@@ -1,10 +1,7 @@
-import json
 from django.core import serializers
 from .models import *
 from django.db.models import Q
 import datetime
-
-TIME_FORMAT = '%Y/%m/%d %H:%M'
 
 
 def check_room_order(roompk, begin, end):  # 检查时间段内，订单有关的占用情况

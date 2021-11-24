@@ -3,32 +3,13 @@ from django.core import serializers
 from .models import *
 from django.db.models import Q
 
-TIME_FORMAT = '%Y/%m/%d %H:%M'
-
 
 def get_inst_info():  # 获取所有乐器的信息
-    data = serializers.serialize(
-        "python", Instrument.objects.all())  # 返回dict格式的objects all
-
-    instdata = []
-    for inst in data:  # 统计数量，乐器信息的详情信息
-        instinfo = {}
-        instinfo["pk"] = inst["pk"]
-        instinfo["name"] = inst["fields"]["name"]
-
-        instinfo["typepk"] = inst["fields"]["type"]
-        instinfo["typename"] = InstrumentType.objects.get(
-            pk=instinfo["typepk"]).name  # 获取该乐器对应的乐器类型的名称
-
-        instinfo["roompk"] = inst["fields"]["room"]
-        instinfo["roomnum"] = len(instinfo["roompk"])
-
-        instdata.append(instinfo)
-
+    data = Instrument.objects.all()  # 返回dict格式的objects all
+    instdata = [inst.get_dict() for inst in data]
     retdata = {}
     retdata["instnum"] = len(data)  # 统计数量
     retdata["data"] = instdata  # 乐器的详情信息
-
     json_data = json.dumps(retdata, ensure_ascii=False)  # 转为json且避免乱码
     return json_data
 
