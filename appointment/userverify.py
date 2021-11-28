@@ -1,0 +1,12 @@
+import json
+import requests
+
+
+def verify(token):
+    token_data = json.dumps({"token": token}, ensure_ascii=False)
+    url = "https://alumni-test.iterator-traits.com/fake-id-tsinghua-proxy/api/user/session/token"
+    try:
+        res = requests.post(url=url, data=token_data)
+        return json.loads(res.text)
+    except:
+        return False
