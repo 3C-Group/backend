@@ -14,6 +14,16 @@ def get_inst_info():  # 获取所有乐器的信息
     return json_data
 
 
+def get_inst_for_type(pk):
+    data = Instrument.objects.filter(type__pk=pk)
+    instdata = [inst.get_dict() for inst in data]
+    retdata = {}
+    retdata["instnum"] = len(data)  # 统计数量
+    retdata["data"] = instdata  # 乐器的详情信息
+    json_data = json.dumps(retdata, ensure_ascii=False)  # 转为json且避免乱码
+    return json_data
+
+
 def delete_inst(pk):  # 删除某一乐器
     if(pk == 1):
         return "forbidden"

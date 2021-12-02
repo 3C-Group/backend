@@ -5,6 +5,7 @@ from django.http.response import JsonResponse, HttpResponse
 from django.shortcuts import render
 
 from .models import *
+from .userverify import verify_token
 
 import appointment.instrument as inst_service
 import appointment.room as room_service
@@ -103,6 +104,17 @@ def get_room_for_type(request):
     return HttpResponse('Method Not Allowed', status=405)
 
 
+def get_inst_for_type(request):
+    if request.method == "POST":
+        try:
+            req = json.loads(request.body)
+            data = inst_service.get_inst_for_type(req["typepk"])
+            return HttpResponse(data)
+        except Exception as e:
+            return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
 def get_order(request):
     if request.method == "POST":
         try:
@@ -152,7 +164,7 @@ def manage_inst(request):  # 管理乐器
             instpk = Instrument.objects.create_inst(
                 name=req["name"], typepk=req["typepk"])
             return HttpResponse(instpk)
-        elif request.method == "DELETE":  # 删除乐器类型
+        elif request.method == "DELETE":  # 删除乐器
             req = json.loads(request.body)
             ret = inst_service.delete_inst(req["pk"])
             if ret == "forbidden":
@@ -386,6 +398,16 @@ def test_upload(request):  # 测试上传图片
             return HttpResponse("success")
         except Exception as e:
             return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
+def get_token(request):
+    try:
+        if request.method == "POST":
+            req = json.loads(request.body)
+            return verify_token(req["token"])
+    except Exception as e:
+        return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
 
 

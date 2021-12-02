@@ -6,6 +6,8 @@ urlpatterns = [
     # 测试图片用
     path("view/", views.testview, name="testview"),
     path("test_upload/", views.test_upload, name="test_upload_image"),
+    
+    path("token/", views.get_token, name="get_token"),
 
     #  乐器管理
     path("manage/inst/", views.manage_inst, name="manage_inst"),
@@ -46,4 +48,6 @@ urlpatterns = [
     path("get_order/", views.get_order, name="get_order"),  # 获取所有的订单信息
     path("get_room_for_type/", views.get_room_for_type,
          name="get_room_for_type"),  # 获取某类型的可用房间
+    path("get_inst_for_type/", views.get_inst_for_type,
+         name="get_inst_for_type"),  # 获取某类型的所有乐器
 ]
