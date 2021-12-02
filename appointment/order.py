@@ -3,7 +3,7 @@ from functools import reduce
 from django.core import serializers
 from .models import *
 from .price import get_price
-from .avalilability import *
+from .availability import *
 from .instrument import check_inst_in_room
 
 TIME_FORMAT = '%Y/%m/%d %H:%M'  # 时间格式

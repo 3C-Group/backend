@@ -1,7 +1,7 @@
 import json
 from django.core import serializers
 from .models import *
-from .avalilability import *
+from .availability import *
 from django.db.models import Q
 import datetime
 from .instrument import remove_inst_from_room

@@ -1,7 +1,7 @@
 import json
 from django.core import serializers
 from .models import *
-from .avalilability import check_room_forbidden, check_room_order
+from .availability import check_room_forbidden, check_room_order
 
 
 def get_inst_type_info():  # 获取所有乐器类型的信息
