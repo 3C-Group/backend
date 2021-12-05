@@ -1,6 +1,7 @@
 from django.core import serializers
 from .models import *
 from django.db.models import Q
+from .price import get_type_price, get_room_price
 import datetime
 
 
@@ -223,8 +224,6 @@ def get_inst_order(instpk, begin, end) -> list:
             timeset.add(order.end_time)
     timeset = sorted(timeset)
 
-    inst = Instrument.objects.get(pk=instpk)
-
     stamplist = []
     for i in range(len(timeset) - 1):  # 对于时间戳的每一个间隔，进行处理
         st = timeset[i]
@@ -350,7 +349,6 @@ def get_inst_avaliability(userpk, instpk, begin_time, end_time):
             timeset.add(order.end_time)
     timeset = sorted(timeset)
 
-    inst = Instrument.objects.get(pk=instpk)
     stamplist = []
     for i in range(len(timeset) - 1):  # 对每个时间戳进行判断
         st = timeset[i]
@@ -386,3 +384,72 @@ def get_inst_avaliability(userpk, instpk, begin_time, end_time):
             result.append(stamplist[i])
 
     return result
+
+
+def get_room_avalist(userpk, roompk, begin_time, end_time):
+    # 搜集用户的所有用户组标签
+    user = UserProfile.objects.get(pk=userpk)
+    usergrouppk_set = [group.pk for group in user.group.all()]
+
+    flag = False
+    for grouppk in usergrouppk_set:
+        if get_room_price(grouppk, roompk) != -1:
+            flag = True
+            break
+    if not flag:
+        return []
+    return get_room_avaliability(userpk, roompk, begin_time, end_time)
+
+
+def get_inst_avalist(userpk, typepk, begin_time, end_time):
+    # 计算时间
+    begin = datetime.datetime.strptime(begin_time, TIME_FORMAT)
+    end = datetime.datetime.strptime(end_time, TIME_FORMAT)
+
+    # 搜集用户的所有用户组标签
+    user = UserProfile.objects.get(pk=userpk)
+    usergrouppk_set = [group.pk for group in user.group.all()]
+
+    aval = []
+    unaval = []
+
+    insts = Instrument.objects.filter(type__pk=typepk)
+    flag = False
+    for grouppk in usergrouppk_set:
+        if get_type_price(grouppk, typepk) != -1:
+            flag = True
+            break
+    if not flag:
+        for inst in insts:
+            unaval.append({"pk": inst.pk, "name": inst.name})
+            return aval, unaval
+    for inst in insts:
+        begin_set = set()
+        end_set = set()
+        instpk = inst.pk
+        instroom_set = inst.room.all()
+        for room in instroom_set:
+            roompk = room.pk
+            roomaval = get_room_avalist(userpk, roompk, begin_time, end_time)
+            for i in range(len(roomaval)):
+                if roomaval[i]["type"] == "ok":
+                    begin_set.add(datetime.datetime.strptime(roomaval[i]["time"], TIME_FORMAT))
+                    end_set.add(end if i+1==len(roomaval) else datetime.datetime.strptime(roomaval[i+1]["time"], TIME_FORMAT))
+        if len(begin_set) == 0:
+            unaval.append({"pk": instpk, "name": inst.name})
+            continue
+        begin_set = sorted(begin_set)
+        end_set = sorted(end_set)
+        time_list = []
+        j = 1
+        cur_time = begin_set[0]
+        while j < len(end_set):
+            if begin_set[j] <= end_set[j-1]:
+                ++j
+            else:
+                time_list.append({"begin": cur_time.strftime(TIME_FORMAT), "end": end_set[j-1].strftime(TIME_FORMAT)})
+                cur_time = begin_set[j]
+        time_list.append({"begin": cur_time.strftime(TIME_FORMAT), "end": end_set[j-1].strftime(TIME_FORMAT)})
+        aval.append({"pk": instpk, "name": inst.name, "time": time_list})
+    return aval, unaval
+        

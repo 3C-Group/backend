@@ -14,7 +14,7 @@ import appointment.usergroup as usergroup_service
 import appointment.user as user_service
 import appointment.price as price_service
 import appointment.order as order_service
-import appointment.avalilability as ava_service
+import appointment.availability as ava_service
 
 
 def index(request):
@@ -384,6 +384,23 @@ def get_room_avalilability(request):
     except Exception as e:
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
+
+# 获取（用户，乐器类型）内，乐器类型中每个乐器的可用性及时间
+
+
+def get_type_availability(request):
+    try:
+        if request.method == "POST":
+            req = json.loads(request.body)
+            aval, unaval = ava_service.get_inst_avalist(
+                req["userpk"], req["typepk"], req["begin_time"], req["end_time"])
+            retdata = {"available": aval, "unavailable": unaval}
+            json_data = json.dumps(retdata, ensure_ascii=False)
+            return HttpResponse(json_data)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
 
 # +++++++++测试用+++++++++
 
