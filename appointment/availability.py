@@ -449,6 +449,7 @@ def get_inst_avalist(userpk, typepk, begin_time, end_time):
             else:
                 time_list.append({"begin": cur_time.strftime(TIME_FORMAT), "end": end_set[j-1].strftime(TIME_FORMAT)})
                 cur_time = begin_set[j]
+                ++j
         time_list.append({"begin": cur_time.strftime(TIME_FORMAT), "end": end_set[j-1].strftime(TIME_FORMAT)})
         aval.append({"pk": instpk, "name": inst.name, "time": time_list})
     return aval, unaval
