@@ -418,7 +418,7 @@ def get_type_availability(request):
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
 
-
+# 从时间段返回房间的状态
 def get_room_from_time(request):
     try:
         if request.method == "POST":
@@ -432,7 +432,19 @@ def get_room_from_time(request):
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
 
-
+# 从房间返回时间段的状态
+def get_time_from_room(request):
+    try:
+        if request.method == "POST":
+            req = json.loads(request.body)
+            aval, unaval = ava_service.get_time_from_room(
+                req["userpk"], req["instpk"], req["roompk"], req["begin_time"], req["end_time"])
+            retdata = {"available": aval, "unavailable": unaval}
+            json_data = json.dumps(retdata, ensure_ascii=False)
+            return HttpResponse(json_data)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
 
     
 

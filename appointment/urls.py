@@ -56,4 +56,6 @@ urlpatterns = [
          name="get_type_availability"),  # 获取某类型的可用性
     path("get_room_from_time/", views.get_room_from_time,
          name="get_room_from_time"),  # 获取某时间段，针对特定乐器与用户的房间可用性
+    path("get_time_from_room/", views.get_time_from_room,
+         name="get_time_from_room"),  # 获取某房间与乐器组的，各时间段可用性
 ]

@@ -524,6 +524,59 @@ def get_room_from_time(userpk, instpk, begin_time, end_time):
     return aval, unaval
 
 
+def get_time_from_room(userpk, instpk, roompk, begin_time, end_time):
+    aval = []
+    unaval = []
+
+    inst = Instrument.objects.get(pk=instpk)
+
+    inst_ava = get_inst_avaliability(userpk, instpk, begin_time, end_time)
+
+    ifinstava = False
+    for i in range(len(inst_ava)):
+        i_begin = inst_ava[i]["time"]
+        if i == len(inst_ava) - 1:
+            i_end = end_time
+        else:
+            i_end = inst_ava[i+1]["time"]
+
+        if inst_ava[i]["type"] == "forbidden":
+            stampinfo = {}
+            stampinfo["type"] = "forbidden"
+            stampinfo["detail"] = ForbiddenInstrument.get_status_detail(
+                inst_ava[i]["status"])
+            stampinfo["begin_time"] = i_begin
+            stampinfo["end_time"] = i_end
+            unaval.append(stampinfo)
+        elif inst_ava[i]["type"] == "order":
+            stampinfo = {}
+            stampinfo["type"] = "order"
+            stampinfo["begin_time"] = i_begin
+            stampinfo["end_time"] = i_end
+            aval.append(stampinfo)
+        else:
+            room_ava = get_room_avaliability(userpk, roompk, i_begin, i_end)
+            for j in range(len(room_ava)):
+                stampinfo = {}
+                stampinfo["begin_time"] = room_ava[j]["time"]
+                if j == len(room_ava) - 1:
+                    stampinfo["end_time"] = i_end
+                else:
+                    stampinfo["end_time"] = room_ava[j]["time"]
+
+                stampinfo["type"] = room_ava[j]["type"]
+                if stampinfo["type"] == "forbidden":
+                    room_ava["detail"] = ForbiddenRoom.get_status_detail(
+                        room_ava[j]["status"])
+                    unaval.append(stampinfo)
+                elif stampinfo["type"] == "order":
+                    unaval.append(stampinfo)
+                elif stampinfo["type"] == "ok":
+                    aval.append(stampinfo)
+
+    return aval, unaval
+
+
 # {
 #    "available": [
 #        {
