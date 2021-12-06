@@ -349,6 +349,23 @@ def manage_room_use(request):
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
 
+# * 设置乐器实例的特殊规则禁用
+def manage_inst_use(request):
+    try:
+        if request.method == "POST":
+            req = json.loads(request.body)
+            ret = inst_service.set_inst_forbidden(req)
+            if ret == "order conflict":
+                return HttpResponse("order conflict", status=409)
+            elif ret == "already forbidden":
+                return HttpResponse("already partly forbidden", status=409)
+            return HttpResponse(ret)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
+
 # * 订单管理
 
 
@@ -401,6 +418,23 @@ def get_type_availability(request):
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
 
+
+def get_room_from_time(request):
+    try:
+        if request.method == "POST":
+            req = json.loads(request.body)
+            aval, unaval = ava_service.get_room_from_time(
+                req["userpk"], req["instpk"], req["begin_time"], req["end_time"])
+            retdata = {"available": aval, "unavailable": unaval}
+            json_data = json.dumps(retdata, ensure_ascii=False)
+            return HttpResponse(json_data)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
+
+    
 
 # +++++++++测试用+++++++++
 

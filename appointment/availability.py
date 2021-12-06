@@ -433,8 +433,10 @@ def get_inst_avalist(userpk, typepk, begin_time, end_time):
             roomaval = get_room_avalist(userpk, roompk, begin_time, end_time)
             for i in range(len(roomaval)):
                 if roomaval[i]["type"] == "ok":
-                    begin_set.add(datetime.datetime.strptime(roomaval[i]["time"], TIME_FORMAT))
-                    end_set.add(end if i+1==len(roomaval) else datetime.datetime.strptime(roomaval[i+1]["time"], TIME_FORMAT))
+                    begin_set.add(datetime.datetime.strptime(
+                        roomaval[i]["time"], TIME_FORMAT))
+                    end_set.add(end if i+1 == len(roomaval)
+                                else datetime.datetime.strptime(roomaval[i+1]["time"], TIME_FORMAT))
         if len(begin_set) == 0:
             unaval.append({"pk": instpk, "name": inst.name})
             continue
@@ -447,10 +449,90 @@ def get_inst_avalist(userpk, typepk, begin_time, end_time):
             if begin_set[j] <= end_set[j-1]:
                 ++j
             else:
-                time_list.append({"begin": cur_time.strftime(TIME_FORMAT), "end": end_set[j-1].strftime(TIME_FORMAT)})
+                time_list.append({"begin": cur_time.strftime(
+                    TIME_FORMAT), "end": end_set[j-1].strftime(TIME_FORMAT)})
                 cur_time = begin_set[j]
                 ++j
-        time_list.append({"begin": cur_time.strftime(TIME_FORMAT), "end": end_set[j-1].strftime(TIME_FORMAT)})
+        time_list.append({"begin": cur_time.strftime(
+            TIME_FORMAT), "end": end_set[j-1].strftime(TIME_FORMAT)})
         aval.append({"pk": instpk, "name": inst.name, "time": time_list})
     return aval, unaval
-        
+
+
+def get_room_from_time(userpk, instpk, begin_time, end_time):
+    aval = []
+    unaval = []
+
+    inst = Instrument.objects.get(pk=instpk)
+
+    inst_ava = get_inst_avaliability(userpk, instpk, begin_time, end_time)
+    if len(inst_ava) == 1 and inst_ava[0]["type"] == "ok":
+        ifinstava = True
+    else:
+        ifinstava = False
+        ifforbidden = False
+        forbidden_detail = -1
+        for i in range(len(inst_ava)):
+            if inst_ava[i]["type"] == "forbidden":
+                ifforbidden = True
+                if forbidden_detail == -1 or inst_ava[i]["status"] < forbidden_detail:
+                    forbidden_detail = inst_ava[i]["status"]
+            elif inst_ava[i]["type"] == "order":
+                pass
+        if ifforbidden:
+            insttype = "forbidden"
+            instdetail = ForbiddenInstrument.get_status_detail(
+                forbidden_detail)
+        else:
+            insttype = "order"
+
+    # TODO: 乐器可用的前提下，保证房间原因
+    roomset = inst.room.all()
+
+    for room in roomset:
+        room_ava = get_room_avaliability(userpk, room.pk, begin_time, end_time)
+        roominfo = {}
+        roominfo["pk"] = room.pk
+        roominfo["name"] = room.name
+
+        if ifinstava == True:
+            if len(room_ava) == 1 and room_ava[0]["type"] == "ok":
+                aval.append(roominfo)
+                roominfo["type"] = "ok"
+            else:
+                unaval.append(roominfo)
+                ifforbidden = False
+                forbidden_detail = -1
+                for i in range(len(room_ava)):
+                    if room_ava[i]["type"] == "forbidden":
+                        ifforbidden = True
+                        if forbidden_detail == -1 or room_ava[i]["status"] < forbidden_detail:
+                            forbidden_detail = room_ava[i]["status"]
+                    elif room_ava[i]["type"] == "order":
+                        pass
+                if ifforbidden:
+                    roominfo["type"] = "forbidden"
+                    roominfo["detail"] = ForbiddenRoom.get_status_detail(
+                        forbidden_detail)
+                else:
+                    roominfo["type"] = "order"
+        else:
+            unaval.append(roominfo)
+            roominfo["type"] = "inst_" + insttype
+            roominfo["detail"] = "inst_" + instdetail
+
+    return aval, unaval
+
+
+# {
+#    "available": [
+#        {
+#            "pk": 1,
+#            "name": "空",
+#            "time": [
+#                {
+#                    "begin": "2021/09/24 11:50",
+#                    "end": "2021/09/24 12:01"
+#                }
+#            ]
+#        },

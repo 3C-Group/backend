@@ -65,6 +65,15 @@ class ForbiddenRoomManager(models.Manager):
         return rule.pk
 
 
+class ForbiddenInstrumentManager(models.Manager):
+    def create_rule(self, grouppk, instpk, begin_time, end_time, status):
+        group = UserGroup.objects.get(pk=grouppk)
+        inst = Instrument.objects.get(pk=instpk)
+        rule = self.create(
+            group=group, inst=inst, begin_time=begin_time, end_time=end_time, status=status)
+        return rule.pk
+
+
 class OrderManager(models.Manager):
     def create_order(self, userpk, roompk, instpk, price,  begin_time, end_time):
         user = UserProfile.objects.get(pk=userpk)
@@ -308,6 +317,15 @@ class ForbiddenRoom(models.Model):  # 对于（用户组，房间，时间段）
 
     objects = ForbiddenRoomManager()
 
+    @classmethod
+    def get_status_detail(cls, arg):
+        if arg == cls.Status.FIX:
+            return "FIX"
+        elif arg == cls.Status.ACTIVITY:
+            return "ACTIVITY"
+        else:
+            return "OTHER"
+
 
 class ForbiddenInstrument(models.Model):  # 对于（用户组，乐器，时间段），进行禁用
     group = models.ForeignKey(  # 禁用乐器类型
@@ -328,6 +346,17 @@ class ForbiddenInstrument(models.Model):  # 对于（用户组，乐器，时间
 
     status = models.IntegerField(choices=Status.choices,
                                  default=Status.FIX)
+
+    objects = ForbiddenInstrumentManager()
+
+    @classmethod
+    def get_status_detail(cls, arg):
+        if arg == cls.Status.FIX:
+            return "FIX"
+        elif arg == cls.Status.ACTIVITY:
+            return "ACTIVITY"
+        else:
+            return "OTHER"
 
 
 # 检查占用：

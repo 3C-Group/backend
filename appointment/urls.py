@@ -34,6 +34,8 @@ urlpatterns = [
     path("manage/room_price/", views.manage_room_price, name="manage_room_price"),
     # 房间对某些用户组关闭
     path("manage/room_use/", views.manage_room_use, name="manage_room_use"),
+    # 乐器对某些用户组关闭
+    path("manage/inst_use/", views.manage_inst_use, name="manage_inst_use"),
 
     #  信息获取
     path("get_type/", views.get_type, name="get_type"),  # 获取所有的乐器类型信息
@@ -52,4 +54,6 @@ urlpatterns = [
          name="get_inst_for_type"),  # 获取某类型的所有乐器
     path("get_type_availability/", views.get_type_availability,
          name="get_type_availability"),  # 获取某类型的可用性
+    path("get_room_from_time/", views.get_room_from_time,
+         name="get_room_from_time"),  # 获取某时间段，针对特定乐器与用户的房间可用性
 ]
