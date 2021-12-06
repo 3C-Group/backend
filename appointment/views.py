@@ -350,6 +350,8 @@ def manage_room_use(request):
     return HttpResponse('Method Not Allowed', status=405)
 
 # * 设置乐器实例的特殊规则禁用
+
+
 def manage_inst_use(request):
     try:
         if request.method == "POST":
@@ -363,7 +365,6 @@ def manage_inst_use(request):
     except Exception as e:
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
-
 
 
 # * 订单管理
@@ -419,6 +420,8 @@ def get_type_availability(request):
     return HttpResponse('Method Not Allowed', status=405)
 
 # 从时间段返回房间的状态
+
+
 def get_room_from_time(request):
     try:
         if request.method == "POST":
@@ -433,6 +436,8 @@ def get_room_from_time(request):
     return HttpResponse('Method Not Allowed', status=405)
 
 # 从房间返回时间段的状态
+
+
 def get_time_from_room(request):
     try:
         if request.method == "POST":
@@ -446,7 +451,22 @@ def get_time_from_room(request):
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
 
-    
+
+def manage_user_balance(request):
+    try:
+        if request.method == "PATCH":  # 给用户发钱
+            req = json.loads(request.body)
+            ret = user_service.add_balance(req["userpk"], req["money"])
+            if ret == "forbidden":
+                return HttpResponse(ret, status=403)
+            return HttpResponse(ret)
+        elif request.method == "GET":  # 查询用户余额
+            userpk = request.GET.get("userpk")
+            ret = user_service.get_balance(userpk)
+            return HttpResponse(ret)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
 
 # +++++++++测试用+++++++++
 

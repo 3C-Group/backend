@@ -37,6 +37,10 @@ urlpatterns = [
     # 乐器对某些用户组关闭
     path("manage/inst_use/", views.manage_inst_use, name="manage_inst_use"),
 
+    # 管理用户余额
+    path("manage/user_balance/", views.manage_user_balance,
+         name="manage_user_balance"),
+
     #  信息获取
     path("get_type/", views.get_type, name="get_type"),  # 获取所有的乐器类型信息
     path("get_inst/", views.get_inst, name="get_inst"),  # 获取所有的乐器信息

@@ -85,3 +85,15 @@ def unset_usergroup(userpk, usergrouppk):  # 取消用户从用户组
     usergroup = UserGroup.objects.get(pk=usergrouppk)
     user.group.remove(usergroup)
     return "success"
+
+
+def add_balance(userpk, money):
+    if money <= 0:
+        return "forbidden"
+    user = UserProfile.objects.get(pk=userpk)
+    user.add_balance(money)
+    return "success"
+
+
+def get_balance(userpk):
+    return UserProfile.objects.get(pk=userpk).balance

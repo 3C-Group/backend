@@ -459,14 +459,14 @@ def get_inst_avalist(userpk, typepk, begin_time, end_time):
     return aval, unaval
 
 
-def get_room_from_time(userpk, instpk, begin_time, end_time):
+def get_room_from_time(userpk, instpk, begin_time, end_time):  # 给定时间段，获取房间的详情
     aval = []
     unaval = []
 
     inst = Instrument.objects.get(pk=instpk)
 
     inst_ava = get_inst_avaliability(userpk, instpk, begin_time, end_time)
-    if len(inst_ava) == 1 and inst_ava[0]["type"] == "ok":
+    if len(inst_ava) == 1 and inst_ava[0]["type"] == "ok":  # 首先检查乐器是否可用
         ifinstava = True
     else:
         ifinstava = False
@@ -486,10 +486,9 @@ def get_room_from_time(userpk, instpk, begin_time, end_time):
         else:
             insttype = "order"
 
-    # TODO: 乐器可用的前提下，保证房间原因
     roomset = inst.room.all()
 
-    for room in roomset:
+    for room in roomset:  # 对房间检查
         room_ava = get_room_avaliability(userpk, room.pk, begin_time, end_time)
         roominfo = {}
         roominfo["pk"] = room.pk
@@ -511,11 +510,11 @@ def get_room_from_time(userpk, instpk, begin_time, end_time):
                     elif room_ava[i]["type"] == "order":
                         pass
                 if ifforbidden:
-                    roominfo["type"] = "forbidden"
-                    roominfo["detail"] = ForbiddenRoom.get_status_detail(
+                    roominfo["type"] = "room_" + "forbidden"
+                    roominfo["detail"] = "room_" + ForbiddenRoom.get_status_detail(
                         forbidden_detail)
                 else:
-                    roominfo["type"] = "order"
+                    roominfo["type"] = "room_" + "order"
         else:
             unaval.append(roominfo)
             roominfo["type"] = "inst_" + insttype
@@ -524,15 +523,12 @@ def get_room_from_time(userpk, instpk, begin_time, end_time):
     return aval, unaval
 
 
-def get_time_from_room(userpk, instpk, roompk, begin_time, end_time):
+def get_time_from_room(userpk, instpk, roompk, begin_time, end_time):  # 给定房间，获取各时间段的可用情况
     aval = []
     unaval = []
 
-    inst = Instrument.objects.get(pk=instpk)
-
     inst_ava = get_inst_avaliability(userpk, instpk, begin_time, end_time)
 
-    ifinstava = False
     for i in range(len(inst_ava)):
         i_begin = inst_ava[i]["time"]
         if i == len(inst_ava) - 1:
@@ -542,15 +538,15 @@ def get_time_from_room(userpk, instpk, roompk, begin_time, end_time):
 
         if inst_ava[i]["type"] == "forbidden":
             stampinfo = {}
-            stampinfo["type"] = "forbidden"
-            stampinfo["detail"] = ForbiddenInstrument.get_status_detail(
+            stampinfo["type"] = "inst_" + "forbidden"
+            stampinfo["detail"] = "inst_" + ForbiddenInstrument.get_status_detail(
                 inst_ava[i]["status"])
             stampinfo["begin_time"] = i_begin
             stampinfo["end_time"] = i_end
             unaval.append(stampinfo)
         elif inst_ava[i]["type"] == "order":
             stampinfo = {}
-            stampinfo["type"] = "order"
+            stampinfo["type"] = "inst_" + "order"
             stampinfo["begin_time"] = i_begin
             stampinfo["end_time"] = i_end
             aval.append(stampinfo)
@@ -562,30 +558,18 @@ def get_time_from_room(userpk, instpk, roompk, begin_time, end_time):
                 if j == len(room_ava) - 1:
                     stampinfo["end_time"] = i_end
                 else:
-                    stampinfo["end_time"] = room_ava[j]["time"]
+                    stampinfo["end_time"] = room_ava[j+1]["time"]
 
                 stampinfo["type"] = room_ava[j]["type"]
                 if stampinfo["type"] == "forbidden":
-                    room_ava["detail"] = ForbiddenRoom.get_status_detail(
-                        room_ava[j]["status"])
+                    stampinfo["type"] = "room_" + stampinfo["type"]
+                    stampinfo["detail"] = "room_" + \
+                        ForbiddenRoom.get_status_detail(room_ava[j]["status"])
                     unaval.append(stampinfo)
                 elif stampinfo["type"] == "order":
+                    stampinfo["type"] = "room_" + stampinfo["type"]
                     unaval.append(stampinfo)
                 elif stampinfo["type"] == "ok":
                     aval.append(stampinfo)
 
     return aval, unaval
-
-
-# {
-#    "available": [
-#        {
-#            "pk": 1,
-#            "name": "空",
-#            "time": [
-#                {
-#                    "begin": "2021/09/24 11:50",
-#                    "end": "2021/09/24 12:01"
-#                }
-#            ]
-#        },

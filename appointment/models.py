@@ -122,6 +122,11 @@ class UserProfile(models.Model):
         info["thuid"] = self.thuid
         return info
 
+    def add_balance(self, money):
+        self.balance = self.balance + money
+        self.save()
+        return
+
     def __str__(self) -> str:
         return "{0} {1}".format(self.user.openid,
                                 self.user.thuid)
