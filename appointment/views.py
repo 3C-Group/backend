@@ -163,6 +163,8 @@ def manage_inst(request):  # 管理乐器
     try:
         if request.method == "POST":  # 增
             req = json.loads(request.body)
+            if(req["typepk"] == 1):
+                return HttpResponse("cannot add null instrument", status=403)
             instpk = Instrument.objects.create_inst(
                 name=req["name"], typepk=req["typepk"])
             return HttpResponse(instpk)
@@ -509,8 +511,8 @@ def set_room_image(request):
             roompk = request.POST.get('roompk')
             room = Room.objects.get(pk=roompk)
             room.img = img
-            room.img.name = hashlib.md5(str(roompk).encode(
-                encoding='UTF-8')).hexdigest()[:20]+"."+img.name.split(".")[-1]
+            room.img.name = hashlib.md5(("room_" + str(roompk)).encode(
+                encoding='UTF-8')).hexdigest()[:10]+"."+img.name.split(".")[-1]
             room.save()
             return HttpResponse("success")
         except Exception as e:
@@ -525,8 +527,8 @@ def set_inst_image(request):
             instpk = request.POST.get('instpk')
             inst = Instrument.objects.get(pk=instpk)
             inst.img = img
-            inst.img.name = hashlib.md5(str(instpk).encode(
-                encoding='UTF-8')).hexdigest()[:20]+"."+img.name.split(".")[-1]
+            inst.img.name = hashlib.md5(("inst_" + str(instpk)).encode(
+                encoding='UTF-8')).hexdigest()[:10]+"."+img.name.split(".")[-1]
             inst.save()
             return HttpResponse("success")
         except Exception as e:
