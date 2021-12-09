@@ -68,3 +68,10 @@ def create_order(req):  # 给定时间段， 房间， 乐器，用户： 创建
     orderpk = Order.objects.create_order(
         req["userpk"], req["roompk"], req["instpk"], price, begin_time, end_time)
     return orderpk
+
+
+def get_order_in_range(begin, end):
+    order_set = Order.objects.order_by('-begin_time')[int(begin): int(end)]
+    order_data = [order.get_dict() for order in order_set]
+    json_data = json.dumps(order_data, ensure_ascii=False)
+    return json_data

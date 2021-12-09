@@ -468,6 +468,19 @@ def manage_user_balance(request):
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
 
+
+def get_order_in_range(request):
+    try:
+        if request.method == "GET":  # 查询用户余额
+            begin = request.GET.get("begin")
+            end = request.GET.get("end")
+            ret = order_service.get_order_in_range(begin, end)
+            return HttpResponse(ret)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
 # +++++++++测试用+++++++++
 
 

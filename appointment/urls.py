@@ -62,4 +62,6 @@ urlpatterns = [
          name="get_room_from_time"),  # 获取某时间段，针对特定乐器与用户的房间可用性
     path("get_time_from_room/", views.get_time_from_room,
          name="get_time_from_room"),  # 获取某房间与乐器组的，各时间段可用性
+    path("get_order_in_range/", views.get_order_in_range,
+         name="get_order_in_range"), # 获取按开始时间的order在[begin, end)范围内的order
 ]
