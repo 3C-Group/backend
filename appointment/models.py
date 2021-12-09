@@ -171,7 +171,7 @@ class Instrument(models.Model):
         "InstrumentType",
         on_delete=models.CASCADE,
     )
-    img = models.ImageField(default="media/inst/default_inst.png",
+    img = models.ImageField(default="inst/default_inst.png",
                             upload_to='inst/')  # 房间的照片
 
     def __str__(self) -> str:
