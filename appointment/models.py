@@ -189,6 +189,7 @@ class Instrument(models.Model):
         instinfo["typename"] = InstrumentType.objects.get(
             pk=instinfo["typepk"]).name  # 获取该乐器对应的乐器类型的名称
         instinfo["roompk"] = [rm.pk for rm in self.room.all()]
+        instinfo["roomname"] = [rm.name for rm in self.room.all()]
         instinfo["roomnum"] = len(instinfo["roompk"])
         return instinfo
 

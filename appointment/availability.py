@@ -1,7 +1,7 @@
 from django.core import serializers
 from .models import *
 from django.db.models import Q
-from .price import get_type_price, get_room_price
+from .price import get_type_price, get_room_price, get_inst_price_user
 import datetime
 
 
@@ -456,7 +456,8 @@ def get_inst_avalist(userpk, typepk, begin_time, end_time):
                     end_set.add(end if i+1 == len(roomaval)
                                 else datetime.datetime.strptime(roomaval[i+1]["time"], TIME_FORMAT))
         if len(begin_set) == 0:
-            unaval.append({"pk": instpk, "name": inst.name})
+            unaval.append({"instprice": get_inst_price_user(
+                userpk, instpk), "instdetail": Instrument.objects.get(pk=instpk).get_dict()})
             continue
         begin_set = sorted(begin_set)
         end_set = sorted(end_set)
@@ -482,7 +483,8 @@ def get_inst_avalist(userpk, typepk, begin_time, end_time):
                 time_end = min(time_end, time_duration[1])
                 result.append({"begin": time_begin.strftime(
                     TIME_FORMAT), "end": time_end.strftime(TIME_FORMAT)})
-        aval.append({"pk": instpk, "name": inst.name, "time": result})
+        aval.append({"time": result, "instprice": get_inst_price_user(
+            userpk, instpk), "instdetail": Instrument.objects.get(pk=instpk).get_dict()})
     return aval, unaval
 
 

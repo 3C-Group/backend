@@ -109,6 +109,25 @@ def get_price(userpk, roompk, instpk):
     if roomprice == DEFAULT_PRICE or typeprice == DEFAULT_PRICE:
         return -1
     return roomprice + typeprice
+
+
+def get_inst_price_user(userpk, instpk):
+    user = UserProfile.objects.get(pk=userpk)
+    typepk = Instrument.objects.get(pk=instpk).type.pk
+
+    typeprice = DEFAULT_PRICE
+
+    for group in user.group.all():
+        typetp = get_or_create_type_price(group.pk, typepk)
+        if typetp.price != DEFAULT_PRICE:
+            if typeprice == DEFAULT_PRICE:
+                typeprice = typetp.price
+            else:
+                typeprice = min(typeprice, typetp.price)
+
+    if typeprice == DEFAULT_PRICE:
+        return -1
+    return typeprice
     '''
     totalprice = DEFAULT_PRICE
     for group in user.group.all():
