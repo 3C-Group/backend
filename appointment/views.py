@@ -471,7 +471,7 @@ def manage_user_balance(request):
 
 def get_order_in_range(request):
     try:
-        if request.method == "GET":  # 查询用户余额
+        if request.method == "GET":  # 查询范围内订单
             begin = request.GET.get("begin")
             end = request.GET.get("end")
             ret = order_service.get_order_in_range(begin, end)
