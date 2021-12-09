@@ -1,6 +1,7 @@
 import datetime
 from django.conf import settings
 from django.db import models
+from django.db.models.fields import CharField
 TIME_FORMAT = '%Y/%m/%d %H:%M'  # 时间格式
 
 # --- managers ---
@@ -88,6 +89,7 @@ class OrderManager(models.Manager):
 
 class NoticeManager(models.Manager):
     def create_notice(self):
+        # TODO
         return
 
 
@@ -374,7 +376,10 @@ class ForbiddenInstrument(models.Model):  # 对于（用户组，乐器，时间
 
 
 class Notice(models.Model):
-
+    title = models.CharField(max_length = 30)
+    content = models.CharField(max_length = 1000)
+    file = models.FileField(upload_to="file/", default="file/NONE.txt")
+    
     objects = NoticeManager()
 
 
