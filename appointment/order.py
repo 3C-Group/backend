@@ -75,3 +75,12 @@ def get_order_in_range(begin, end):
     order_data = [order.get_dict() for order in order_set]
     json_data = json.dumps(order_data, ensure_ascii=False)
     return json_data
+
+
+def verify_order(order_token):
+    order = Order.objects.get(hash=order_token)
+    if order.status == Order.STATUS_PAID:
+        order.status = Order.STATUS_FINISHED
+        order.save()
+        return True
+    return False

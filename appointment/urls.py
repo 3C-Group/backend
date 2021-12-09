@@ -8,6 +8,7 @@ urlpatterns = [
     path("test_upload/", views.test_upload, name="test_upload_image"),
 
     path("token/", views.get_token, name="get_token"),
+    path("verify_order/", views.verify_order, name="verify_order"),
 
     #  乐器管理
     path("manage/inst/", views.manage_inst, name="manage_inst"),
