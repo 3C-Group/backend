@@ -4,6 +4,8 @@ from django.http import HttpResponse
 from django.http.response import JsonResponse, HttpResponse
 from django.shortcuts import render
 
+import hashlib
+
 from .models import *
 from .userverify import verify_token
 
@@ -492,6 +494,8 @@ def set_room_image(request):
             roompk = request.POST.get('roompk')
             room = Room.objects.get(pk=roompk)
             room.img = img
+            room.img.name = hashlib.md5(str(roompk).encode(
+                encoding='UTF-8')).hexdigest()[:20]+"."+img.name.split(".")[-1]
             room.save()
             return HttpResponse("success")
         except Exception as e:
@@ -506,6 +510,8 @@ def set_inst_image(request):
             instpk = request.POST.get('instpk')
             inst = Instrument.objects.get(pk=instpk)
             inst.img = img
+            inst.img.name = hashlib.md5(str(instpk).encode(
+                encoding='UTF-8')).hexdigest()[:20]+"."+img.name.split(".")[-1]
             inst.save()
             return HttpResponse("success")
         except Exception as e:

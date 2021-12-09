@@ -224,7 +224,7 @@ class Order(models.Model):
     )
     price = models.IntegerField(default=0)  # 原价
     paid = models.IntegerField(default=0)   # 实际支付的金额
-    hash = models.CharField(max_length=8)
+    hash = models.CharField(max_length=8, default="default")
 
     class Status(models.IntegerChoices):
         UNPAID = 1     # 未支付
@@ -376,10 +376,10 @@ class ForbiddenInstrument(models.Model):  # 对于（用户组，乐器，时间
 
 
 class Notice(models.Model):
-    title = models.CharField(max_length = 30)
-    content = models.CharField(max_length = 1000)
+    title = models.CharField(max_length=30)
+    content = models.CharField(max_length=1000)
     file = models.FileField(upload_to="file/", default="file/NONE.txt")
-    
+
     objects = NoticeManager()
 
 

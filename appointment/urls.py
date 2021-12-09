@@ -43,6 +43,8 @@ urlpatterns = [
 
     path("set_room_image/", views.set_room_image, name="set_room_image"),
     # 设置房间的image
+    path("set_inst_image/", views.set_inst_image, name="set_inst_image"),
+    # 设置inst的image
 
     #  信息获取
     path("get_type/", views.get_type, name="get_type"),  # 获取所有的乐器类型信息
