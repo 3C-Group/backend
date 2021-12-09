@@ -251,6 +251,10 @@ class Order(models.Model):
         item_data["price"] = self.price
         item_data["paid"] = self.paid
         item_data["hash"] = self.hash
+        item_data["room_name"] = Room.objects.get(pk=self.room.pk).name
+        item_data["inst_name"] = Instrument.objects.get(pk=self.inst.pk).name
+        item_data["user_openid"] = UserProfile.objects.get(
+            pk=self.user.pk).openid
         if self.status == self.Status.UNPAID:
             item_data["status"] = "UNPAID"
         elif self.status == self.Status.PAID:
