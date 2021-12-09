@@ -24,10 +24,16 @@ urlpatterns = [
     path("manage/user/", views.manage_user, name="manage_user"),
     # 管理订单
     path("manage/order/", views.manage_order, name="manage_order"),
+    # 管理通知
+    path("manage/notice/", views.manage_notice, name="manage_notice"),
 
     # 用户与用户组的关系管理
     path("manage/user_to_group/", views.manage_user_to_group,
          name="manage_user_to_group"),
+
+    # 修改通知
+    path("modify_notice/", views.modify_notice,
+         name="modify_notice"),
 
     # 乐器类型与用户价格的设置
     path("manage/type_price/", views.manage_type_price, name="manage_type_price"),

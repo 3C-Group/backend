@@ -91,10 +91,10 @@ class OrderManager(models.Manager):
 
 
 class NoticeManager(models.Manager):
-    def create_notice(self):
-        # TODO
-        return
-
+    def create_notice(self, title, content, time):
+        notice = self.create(title=title, content=content,
+                             time=time, file=None)
+        return notice.pk
 
 # --- models ---
 
@@ -383,9 +383,20 @@ class Notice(models.Model):
     title = models.CharField(max_length=30)
     content = models.CharField(max_length=1000)
     file = models.FileField(upload_to="file/", default="file/NONE.txt")
-    time = models.DateTimeField(default=datetime.datetime(1, 1, 1)) # 发布时间
+    time = models.DateTimeField(default=datetime.datetime(1, 1, 1))  # 发布时间
+    filename = models.CharField(max_length=100, default="")
 
     objects = NoticeManager()
+
+    def get_dict(self):
+        noticeinfo = {}
+        noticeinfo["pk"] = self.pk
+        noticeinfo["title"] = self.title
+        noticeinfo["content"] = self.content
+        noticeinfo["time"] = datetime.datetime.strftime(self.time, TIME_FORMAT)
+        noticeinfo["file"] = self.file.url if self.file else None
+        noticeinfo["filename"] = self.filename if self.file else None
+        return noticeinfo
 
 
 # 检查占用：

@@ -17,6 +17,7 @@ import appointment.user as user_service
 import appointment.price as price_service
 import appointment.order as order_service
 import appointment.availability as ava_service
+import appointment.notice as notice_service
 
 
 def index(request):
@@ -406,6 +407,43 @@ def verify_order(request):
                 return HttpResponse("success")
             else:
                 return HttpResponse("fail", status=409)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
+def manage_notice(request):
+    try:
+        if request.method == "POST":
+            title = request.POST.get('title')
+            content = request.POST.get('content')
+            time = request.POST.get('time')
+            file = request.FILES.get('file')
+            ret = notice_service.create_notice(title, content, time, file)
+            return HttpResponse(ret)
+        elif request.method == "GET":
+            ret = notice_service.get_all_notice()
+            return HttpResponse(ret)
+        elif request.method == "DELETE":
+            req = json.loads(request.body)
+            ret = notice_service.delete_notice(req["noticepk"])
+            return HttpRespoe(ret)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
+def modify_notice(request):
+    try:
+        if request.method == "POST":
+            noticepk = request.POST.get('noticepk')
+            title = request.POST.get('title')
+            content = request.POST.get('content')
+            time = request.POST.get('time')
+            file = request.FILES.get('file')
+            ret = notice_service.modify_notice(
+                noticepk, title, content, time, file)
+            return HttpResponse(ret)
     except Exception as e:
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
