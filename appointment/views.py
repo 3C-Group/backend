@@ -427,7 +427,7 @@ def manage_notice(request):
         elif request.method == "DELETE":
             req = json.loads(request.body)
             ret = notice_service.delete_notice(req["noticepk"])
-            return HttpRespoe(ret)
+            return HttpResponse(ret)
     except Exception as e:
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
