@@ -142,7 +142,7 @@ class UserProfile(models.Model):
 
 
 class Room(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=20, unique=True)
     max_inst = models.IntegerField(default=1)  # 房屋最多可以放置多少乐器
     img = models.ImageField(default="room/default_room.png",
                             upload_to='room/')  # 房间的照片
@@ -164,7 +164,7 @@ class Room(models.Model):
 
 
 class Instrument(models.Model):
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=30, unique=True)
     room = models.ManyToManyField(  # 可以去往的房间
         "Room", )
     type = models.ForeignKey(  # 乐器类型
@@ -193,7 +193,7 @@ class Instrument(models.Model):
 
 
 class InstrumentType(models.Model):
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=30, unique=True)
 
     def __str__(self) -> str:
         return self.name
@@ -224,7 +224,7 @@ class Order(models.Model):
     )
     price = models.IntegerField(default=0)  # 原价
     paid = models.IntegerField(default=0)   # 实际支付的金额
-    hash = models.CharField(max_length=8, default="default")
+    hash = models.CharField(max_length=8, default="default", unique=True)
 
     class Status(models.IntegerChoices):
         UNPAID = 1     # 未支付
@@ -271,7 +271,7 @@ class Unavailability(models.Model):
 
 
 class UserGroup(models.Model):
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=30, unique=True)
 
     def __str__(self) -> str:
         return self.name
@@ -379,6 +379,7 @@ class Notice(models.Model):
     title = models.CharField(max_length=30)
     content = models.CharField(max_length=1000)
     file = models.FileField(upload_to="file/", default="file/NONE.txt")
+    time = models.DateTimeField(default=datetime.datetime(1, 1, 1)) # 发布时间
 
     objects = NoticeManager()
 
