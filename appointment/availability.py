@@ -440,8 +440,8 @@ def get_inst_avalist(userpk, typepk, begin_time, end_time):
         inst_ava = []
         for i in range(len(instaval)):
             if instaval[i]["type"] == "ok":
-                inst_ava.append(
-                    (instaval[i]["time"], end if i+1 == len(instaval) else instaval[i+1]["time"]))
+                inst_ava.append((datetime.datetime.strptime(instaval[i]["time"], TIME_FORMAT), end if i+1 == len(instaval)
+                                else datetime.datetime.strptime(instaval[i+1]["time"], TIME_FORMAT)))
         begin_set = set()
         end_set = set()
         instpk = inst.pk
