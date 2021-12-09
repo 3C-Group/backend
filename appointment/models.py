@@ -2,6 +2,7 @@ import datetime
 from django.conf import settings
 from django.db import models
 from django.db.models.fields import CharField
+from .myutils import get_md5_8th
 TIME_FORMAT = '%Y/%m/%d %H:%M'  # 时间格式
 
 # --- managers ---
@@ -76,14 +77,16 @@ class ForbiddenInstrumentManager(models.Manager):
 
 
 class OrderManager(models.Manager):
-    def create_order(self, userpk, roompk, instpk, price,  begin_time, end_time):
+    def create_order(self, userpk, roompk, instpk, price, begin_time, end_time):
         user = UserProfile.objects.get(pk=userpk)
         room = Room.objects.get(pk=roompk)
         inst = Instrument.objects.get(pk=instpk)
         status = Order.Status.UNPAID  # 默认未支付
-        # TODO: hash
         order = self.create(user=user, room=room, inst=inst, status=status,
                             begin_time=begin_time, end_time=end_time, price=price)
+        hash = get_md5_8th(order.pk)
+        order.hash = hash
+        order.save()
         return order.pk
 
 
@@ -247,6 +250,7 @@ class Order(models.Model):
         item_data["instpk"] = self.inst.pk
         item_data["price"] = self.price
         item_data["paid"] = self.paid
+        item_data["hash"] = self.hash
         if self.status == self.Status.UNPAID:
             item_data["status"] = "UNPAID"
         elif self.status == self.Status.PAID:
