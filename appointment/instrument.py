@@ -97,6 +97,8 @@ def check_order(usergrouppk, instpk, begin, end):  # 检查这一时间段，是
 
 
 def set_inst_forbidden(req):  # 设置乐器禁用  [begin_time, end_time)
+    if req["instpk"] == 1:
+        return "forbidden"
     begin_time = datetime.datetime.strptime(req["begin_time"], TIME_FORMAT)
     end_time = datetime.datetime.strptime(req["end_time"], TIME_FORMAT)
     if end_time <= begin_time:

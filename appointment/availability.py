@@ -6,6 +6,8 @@ import datetime
 
 
 def check_room_order(roompk, begin, end):  # 检查时间段内，订单有关的占用情况
+    if roompk == 1:
+        return False
     result = get_room_order(roompk, begin, end)
     # 如果长度大于1，至少1个时间段无法获取. 或者长度为0，且它是一个order
     if len(result) > 1 or result[0]["type"] == "order":
@@ -62,6 +64,8 @@ def get_room_order(roompk, begin, end) -> list:
 
 
 def check_room_forbidden(userpk, roompk, begin, end):  # 检查时间段内是否该用户无法使用
+    if roompk == 1:
+        return False
     user = UserProfile.objects.get(pk=userpk)
     groupset = [group.pk for group in user.group.all()]  # 搜集用户的所有用户组标签
     result = get_room_rule(groupset, roompk, begin, end)
@@ -198,6 +202,8 @@ def get_room_avaliability(userpk, roompk, begin_time, end_time):
 
 
 def check_inst_order(instpk, begin, end):  # 检查时间段内，订单有关的占用情况
+    if instpk == 1:
+        return False
     result = get_inst_order(instpk, begin, end)
     # 如果长度大于1，至少1个时间段无法获取. 或者长度为0，且它是一个order
     if len(result) > 1 or result[0]["type"] == "order":
@@ -251,6 +257,8 @@ def get_inst_order(instpk, begin, end) -> list:
 
 
 def check_inst_forbidden(userpk, instpk, begin, end):  # 检查时间段内是否该用户无法使用
+    if instpk == 1:
+        return False
     user = UserProfile.objects.get(pk=userpk)
     groupset = [group.pk for group in user.group.all()]  # 搜集用户的所有用户组标签
     result = get_inst_rule(groupset, instpk, begin, end)
@@ -311,6 +319,11 @@ def get_inst_rule(usergrouppk_set, instpk, begin, end) -> list:
 
 # 给定user, inst, 以及时间段，返回这一整段时间内，inst的可用性
 def get_inst_avaliability(userpk, instpk, begin_time, end_time):
+    stamplist = []
+    if instpk == 1:
+        ststr = datetime.datetime.strftime(begin_time, TIME_FORMAT)
+        stamplist.append({"time": ststr, "type": "ok", "status": 0})
+        return stamplist
 
     # 计算时间
     begin = datetime.datetime.strptime(begin_time, TIME_FORMAT)
@@ -349,7 +362,6 @@ def get_inst_avaliability(userpk, instpk, begin_time, end_time):
             timeset.add(order.end_time)
     timeset = sorted(timeset)
 
-    stamplist = []
     for i in range(len(timeset) - 1):  # 对每个时间戳进行判断
         st = timeset[i]
         ststr = datetime.datetime.strftime(st, TIME_FORMAT)
@@ -424,6 +436,12 @@ def get_inst_avalist(userpk, typepk, begin_time, end_time):
             unaval.append({"pk": inst.pk, "name": inst.name})
             return aval, unaval
     for inst in insts:
+        instaval = get_inst_avaliability(userpk, inst.pk, begin_time, end_time)
+        inst_ava = []
+        for i in range(len(instaval)):
+            if instaval[i]["type"] == "ok":
+                inst_ava.append(
+                    (instaval[i]["time"], end if i+1 == len(instaval) else instaval[i+1]["time"]))
         begin_set = set()
         end_set = set()
         instpk = inst.pk
@@ -443,19 +461,28 @@ def get_inst_avalist(userpk, typepk, begin_time, end_time):
         begin_set = sorted(begin_set)
         end_set = sorted(end_set)
         time_list = []
+        result = []
         j = 1
         cur_time = begin_set[0]
         while j < len(end_set):
             if begin_set[j] <= end_set[j-1]:
                 ++j
             else:
-                time_list.append({"begin": cur_time.strftime(
-                    TIME_FORMAT), "end": end_set[j-1].strftime(TIME_FORMAT)})
+                time_list.append((cur_time, end_set[j-1]))
                 cur_time = begin_set[j]
                 ++j
-        time_list.append({"begin": cur_time.strftime(
-            TIME_FORMAT), "end": end_set[j-1].strftime(TIME_FORMAT)})
-        aval.append({"pk": instpk, "name": inst.name, "time": time_list})
+        time_list.append((cur_time, end_set[j-1]))
+        for inst_ava_duration in inst_ava:
+            time_begin = inst_ava_duration[0]
+            time_end = inst_ava_duration[1]
+            for time_duration in time_list:
+                if time_begin >= time_duration[1] or time_end <= time_duration[0]:
+                    continue
+                time_begin = max(time_begin, time_duration[0])
+                time_end = min(time_end, time_duration[1])
+                result.append({"begin": time_begin.strftime(
+                    TIME_FORMAT), "end": time_end.strftime(TIME_FORMAT)})
+        aval.append({"pk": instpk, "name": inst.name, "time": result})
     return aval, unaval
 
 
