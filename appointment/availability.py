@@ -434,7 +434,7 @@ def get_inst_avalist(userpk, typepk, begin_time, end_time):
     if not flag:
         for inst in insts:
             unaval.append({"pk": inst.pk, "name": inst.name})
-            return aval, unaval
+        return aval, unaval
     for inst in insts:
         instaval = get_inst_avaliability(userpk, inst.pk, begin_time, end_time)
         inst_ava = []
