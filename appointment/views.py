@@ -481,6 +481,34 @@ def get_order_in_range(request):
     return HttpResponse('Method Not Allowed', status=405)
 
 
+def set_room_image(request):
+    if request.method == "POST":
+        try:
+            img = request.FILES.get('file')
+            roompk = request.POST.get('roompk')
+            room = Room.objects.get(pk=roompk)
+            room.img = img
+            room.save()
+            return HttpResponse("success")
+        except Exception as e:
+            return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
+def set_inst_image(request):
+    if request.method == "POST":
+        try:
+            img = request.FILES.get('file')
+            instpk = request.POST.get('instpk')
+            inst = Instrument.objects.get(pk=instpk)
+            inst.img = img
+            inst.save()
+            return HttpResponse("success")
+        except Exception as e:
+            return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
 # +++++++++测试用+++++++++
 
 

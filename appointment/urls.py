@@ -41,6 +41,9 @@ urlpatterns = [
     path("manage/user_balance/", views.manage_user_balance,
          name="manage_user_balance"),
 
+    path("set_room_image/", views.set_room_image, name="set_room_image"),
+    # 设置房间的image
+
     #  信息获取
     path("get_type/", views.get_type, name="get_type"),  # 获取所有的乐器类型信息
     path("get_inst/", views.get_inst, name="get_inst"),  # 获取所有的乐器信息
@@ -63,5 +66,5 @@ urlpatterns = [
     path("get_time_from_room/", views.get_time_from_room,
          name="get_time_from_room"),  # 获取某房间与乐器组的，各时间段可用性
     path("get_order_in_range/", views.get_order_in_range,
-         name="get_order_in_range"), # 获取按开始时间的order在[begin, end)范围内的order
+         name="get_order_in_range"),  # 获取按开始时间的order在[begin, end)范围内的order
 ]

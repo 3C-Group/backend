@@ -80,9 +80,15 @@ class OrderManager(models.Manager):
         room = Room.objects.get(pk=roompk)
         inst = Instrument.objects.get(pk=instpk)
         status = Order.Status.UNPAID  # 默认未支付
+        # TODO: hash
         order = self.create(user=user, room=room, inst=inst, status=status,
                             begin_time=begin_time, end_time=end_time, price=price)
         return order.pk
+
+
+class NoticeManager(models.Manager):
+    def create_notice(self):
+        return
 
 
 # --- models ---
@@ -136,7 +142,7 @@ class UserProfile(models.Model):
 class Room(models.Model):
     name = models.CharField(max_length=20)
     max_inst = models.IntegerField(default=1)  # 房屋最多可以放置多少乐器
-    img = models.ImageField(default="media/room/default_room.png",
+    img = models.ImageField(default="room/default_room.png",
                             upload_to='room/')  # 房间的照片
 
     def __str__(self) -> str:
@@ -147,6 +153,7 @@ class Room(models.Model):
         roominfo["pk"] = self.pk
         roominfo["name"] = self.name
         roominfo["max_inst"] = self.max_inst
+        roominfo["img"] = self.img.url
         roominfo["inst"] = [inst.pk for inst in Room.objects.get(
             pk=self.pk).instrument_set.all()]  # 所有可到访的乐器
         return roominfo
@@ -171,6 +178,7 @@ class Instrument(models.Model):
     def get_dict(self) -> dict:
         instinfo = {}
         instinfo["pk"] = self.pk
+        instinfo["img"] = self.img.url
         instinfo["name"] = self.name
         instinfo["typepk"] = self.type.pk
         instinfo["typename"] = InstrumentType.objects.get(
@@ -214,6 +222,7 @@ class Order(models.Model):
     )
     price = models.IntegerField(default=0)  # 原价
     paid = models.IntegerField(default=0)   # 实际支付的金额
+    hash = models.CharField(max_length=8)
 
     class Status(models.IntegerChoices):
         UNPAID = 1     # 未支付
@@ -362,6 +371,11 @@ class ForbiddenInstrument(models.Model):  # 对于（用户组，乐器，时间
             return "ACTIVITY"
         else:
             return "OTHER"
+
+
+class Notice(models.Model):
+
+    objects = NoticeManager()
 
 
 # 检查占用：
