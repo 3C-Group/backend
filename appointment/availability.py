@@ -512,6 +512,7 @@ def get_room_from_time(userpk, instpk, begin_time, end_time):  # 给定时间段
                 forbidden_detail)
         else:
             insttype = "order"
+            instdetail = "order"
 
     roomset = inst.room.all()
 
