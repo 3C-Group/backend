@@ -344,6 +344,8 @@ def manage_room_use(request):
                 return HttpResponse("order conflict", status=409)
             elif ret == "already forbidden":
                 return HttpResponse("already partly forbidden", status=409)
+            elif ret == "forbidden":
+                return HttpResponse("cannot manage built-in room", status=403)
             return HttpResponse(ret)
     except Exception as e:
         return HttpResponse(e, status=400)
@@ -361,6 +363,8 @@ def manage_inst_use(request):
                 return HttpResponse("order conflict", status=409)
             elif ret == "already forbidden":
                 return HttpResponse("already partly forbidden", status=409)
+            elif ret == "forbidden":
+                return HttpResponse("cannot manage built-in inst", status=403)
             return HttpResponse(ret)
     except Exception as e:
         return HttpResponse(e, status=400)
