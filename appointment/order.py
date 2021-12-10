@@ -27,6 +27,10 @@ def get_order(req):  # TODO
         if "end_time" in req:
             end_time = datetime.datetime.strptime(req["end_time"], TIME_FORMAT)
             Qset.add(Q(end_time__lte=end_time))
+        if "status" in req:
+            status_dict = {"PAID": Order.Status.UNPAID, "FINISHED": Order.Status.FINISHED,
+                           "CANCELLED": Order.Status.CANCELLED, "UNPAID": Order.Status.UNPAID, "OUTDATED": Order.Status.OUTDATED}
+            Qset.add(Q(status=status_dict(req["status"])))
     if len(Qset) == 0:
         return "not found"
     data = Order.objects.filter(reduce(lambda x, y: x & y, Qset))

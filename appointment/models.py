@@ -263,7 +263,7 @@ class Order(models.Model):
         elif self.status == self.Status.CANCELLED:
             item_data["status"] = "CANCELLED"
         elif self.status == self.Status.FINISHED:
-            item_data["status"] = self.Status.FINISHED
+            item_data["status"] = "FINISHED"
         elif self.status == self.Status.OUTDATED:
             item_data["status"] = "OUTDATED"
         return item_data
