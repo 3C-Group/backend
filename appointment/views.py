@@ -125,6 +125,8 @@ def get_order(request):
             data = order_service.get_order(req)
             if data == "not found":
                 return HttpResponse("no such order", status=404)
+            if data == "empty Qset":
+                return HttpResponse("should at least one query", status=416)
             return HttpResponse(data)
         except Exception as e:
             return HttpResponse(e, status=400)

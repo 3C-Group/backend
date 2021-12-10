@@ -8,6 +8,9 @@ from .instrument import check_inst_in_room
 
 TIME_FORMAT = '%Y/%m/%d %H:%M'  # 时间格式
 
+status_dict = {"PAID": Order.Status.UNPAID, "FINISHED": Order.Status.FINISHED,
+               "CANCELLED": Order.Status.CANCELLED, "UNPAID": Order.Status.UNPAID, "OUTDATED": Order.Status.OUTDATED}
+
 
 def get_order(req):  # TODO
     Qset = set()
@@ -28,12 +31,12 @@ def get_order(req):  # TODO
             end_time = datetime.datetime.strptime(req["end_time"], TIME_FORMAT)
             Qset.add(Q(end_time__lte=end_time))
         if "status" in req:
-            status_dict = {"PAID": Order.Status.UNPAID, "FINISHED": Order.Status.FINISHED,
-                           "CANCELLED": Order.Status.CANCELLED, "UNPAID": Order.Status.UNPAID, "OUTDATED": Order.Status.OUTDATED}
-            Qset.add(Q(status=status_dict(req["status"])))
+            Qset.add(Q(status=status_dict[req["status"]]))
     if len(Qset) == 0:
-        return "not found"
+        return "empty Qset"
     data = Order.objects.filter(reduce(lambda x, y: x & y, Qset))
+    if len(data) == 0:
+        return "not found"
     ret_data = [item.get_dict() for item in data]  # 格式化
     json_data = json.dumps(ret_data, ensure_ascii=False)
     return json_data
