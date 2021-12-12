@@ -49,9 +49,15 @@ def get_all_order(req):  # for test only
 
 def create_order(req):  # 给定时间段， 房间， 乐器，用户： 创建一个订单
     begin_time = datetime.datetime.strptime(req["begin_time"], TIME_FORMAT)
+    if begin_time.date() <= datetime.datetime.now().date():
+        return "begin time is in the past"
+    if begin_time.date() > datetime.datetime.now().date() + datetime.timedelta(days=7):
+        return "begin time is too far away"
     end_time = datetime.datetime.strptime(req["end_time"], TIME_FORMAT)
     if end_time <= begin_time:
         raise ValueError("invalid time length")
+    if end_time.date() > datetime.datetime.now().date():
+        return "end time must in the same day"
 
     price = get_price(req["userpk"], req["roompk"], req["instpk"])
     if price == -1:
