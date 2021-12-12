@@ -390,7 +390,7 @@ def manage_order(request):
                 return HttpResponse(ret, status=403)
             if ret == "room order conflict" or ret == "inst order conflict" or ret == "inst not in the room":
                 return HttpResponse(ret, status=409)
-            if ret == "begin time is in the past" or ret == "begin time is too far away":
+            if ret == "begin time is in the past" or ret == "begin time is too far away" or "end time must in the same day":
                 return HttpResponse(ret, status=403)
             return HttpResponse(ret)
         elif request.method == "GET":  # TODO: only for test
