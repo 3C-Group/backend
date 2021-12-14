@@ -1,8 +1,6 @@
 import json
 from django.core import serializers
 from functools import reduce
-
-from appointment.instrument import add_inst_to_room
 from .models import *
 from django.db.models import Q
 
