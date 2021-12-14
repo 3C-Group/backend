@@ -9,7 +9,7 @@ TEACHER_PK = 2
 OTHER_PK = 3
 
 
-def get_user_info():  # 获取所有房间的信息
+def get_user_info():  # 获取所有用户的信息
     data = UserProfile.objects.all()  # 返回dict格式的objects all
 
     userdata = [user.get_dict() for user in data]
