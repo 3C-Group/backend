@@ -321,8 +321,7 @@ def get_inst_rule(usergrouppk_set, instpk, begin, end) -> list:
 def get_inst_avaliability(userpk, instpk, begin_time, end_time):
     stamplist = []
     if instpk == 1:
-        ststr = datetime.datetime.strftime(begin_time, TIME_FORMAT)
-        stamplist.append({"time": ststr, "type": "ok", "status": 0})
+        stamplist.append({"time": begin_time, "type": "ok", "status": 0})
         return stamplist
 
     # 计算时间
