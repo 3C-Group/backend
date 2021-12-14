@@ -72,14 +72,14 @@ def get_usergroup(request):  # 获取所有用户组的列表
     return HttpResponse('Method Not Allowed', status=405)
 
 
-def get_user(request):  # 获取所有用户的列表
-    if request.method == "GET":
-        try:
-            data = user_service.get_user_info()
-            return HttpResponse(data)
-        except Exception as e:
-            return HttpResponse(e, status=400)
-    return HttpResponse('Method Not Allowed', status=405)
+# def get_user(request):  # 获取所有用户的列表
+#     if request.method == "GET":
+#         try:
+#             data = user_service.get_user_info()
+#             return HttpResponse(data)
+#         except Exception as e:
+#             return HttpResponse(e, status=400)
+#     return HttpResponse('Method Not Allowed', status=405)
 
 
 def get_price(request):  # 获取（用户，乐器，房间）三元组的价格
