@@ -133,6 +133,17 @@ def get_order(request):
     return HttpResponse('Method Not Allowed', status=405)
 
 
+def get_user(request):  # 获取用户
+    if request.method == "POST":
+        try:
+            req = json.loads(request.body)
+            data = user_service.get_user(req)
+            return HttpResponse(data)
+        except Exception as e:
+            return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
 # * MANAGE TYPE 乐器类型管理
 
 

@@ -1,6 +1,10 @@
 import json
 from django.core import serializers
+from functools import reduce
+
+from appointment.instrument import add_inst_to_room
 from .models import *
+from django.db.models import Q
 
 STUDENT_PK = 1
 TEACHER_PK = 2
@@ -13,6 +17,38 @@ def get_user_info():  # 获取所有房间的信息
     userdata = [user.get_dict() for user in data]
 
     json_data = json.dumps(userdata, ensure_ascii=False)  # 转为json且避免乱码
+    return json_data
+
+
+def get_user(req):
+    Qset = set()
+    if "thuid" in req:
+        Qset.add(Q(thuid=req["thuid"]))
+    if "openid" in req:
+        Qset.add(Q(openid=req["openid"]))
+    if "status" in req:
+        if req["status"] == "STUDENT":
+            Qset.add(Q(status=UserProfile.Status.STUDENT))
+        elif req["status"] == "TEACHER":
+            Qset.add(Q(status=UserProfile.Status.TEACHER))
+        elif req["status"] == "UNAUTHORIZED":
+            Qset.add(Q(status=UserProfile.Status.UNAUTHORIZED))
+        else:
+            Qset.add(Q(status=UserProfile.Status.OTHER))
+
+    if "grouppk" in req:
+        data = UserGroup.objects.get(pk=req["grouppk"]).userprofile_set.all()
+    else:
+        data = UserProfile.objects.all()
+
+    if(len(Qset) > 0):
+        data = data.filter(reduce(lambda x, y: x & y, Qset))
+
+    if "begin_num" in req and "end_num" in req:
+        data = data.order_by(
+            "openid")[int(req["begin_num"]):int(req["end_num"])]
+    ret_data = [item.get_dict() for item in data]  # 格式化
+    json_data = json.dumps(ret_data, ensure_ascii=False)
     return json_data
 
 

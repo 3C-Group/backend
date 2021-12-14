@@ -64,6 +64,7 @@ urlpatterns = [
     path("get_room_avalilability/", views.get_room_avalilability,
          name="get_room_avalilability"),  # 获取一段时间的房间可用性
     path("get_order/", views.get_order, name="get_order"),  # 获取所有的订单信息
+    path("get_user/", views.get_user, name="get_user"),  # 获取所有的订单信息
     path("get_room_for_type/", views.get_room_for_type,
          name="get_room_for_type"),  # 获取某类型的可用房间
     path("get_inst_for_type/", views.get_inst_for_type,
