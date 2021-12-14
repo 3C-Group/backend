@@ -6,7 +6,7 @@ def verify_token(token):
     token_data = json.dumps({"token": token}, ensure_ascii=False)
     url = "https://alumni-test.iterator-traits.com/fake-id-tsinghua-proxy/api/user/session/token"
     try:
-        res = requests.post(url=url, data=token_data)
+        res = requests.post(url=url, data=token_data, headers = {'content-type': "application/json"})
         return json.dumps(res.json())
     except:
         return False
