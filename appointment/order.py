@@ -5,6 +5,7 @@ from .models import *
 from .price import get_price
 from .availability import *
 from .instrument import check_inst_in_room
+from math import ceil
 
 TIME_FORMAT = '%Y/%m/%d %H:%M'  # 时间格式
 
@@ -64,8 +65,8 @@ def create_order(req):  # 给定时间段， 房间， 乐器，用户： 创建
     if end_time.date() > begin_time.date() + datetime.timedelta(hours=3):
         return "too long period"
 
-    price = get_price(req["userpk"], req["roompk"], req["instpk"]) * \
-        ((float(end_time.date() - begin_time.date()).seconds) / 3600)
+    price = ceil(get_price(req["userpk"], req["roompk"], req["instpk"]) * \
+        ((float((end_time.date() - begin_time.date()).seconds)) / 3600))
     if price == -1:
         return "no permission to use"
 
