@@ -218,6 +218,7 @@ class InstrumentType(models.Model):
 class Order(models.Model):
     begin_time = models.DateTimeField(default=datetime.datetime(1, 1, 1))
     end_time = models.DateTimeField(default=datetime.datetime(1, 1, 1))
+    created_time = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(
         "UserProfile",
         on_delete=models.DO_NOTHING,

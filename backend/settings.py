@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_q',
 ]
 
 MIDDLEWARE = [
@@ -52,6 +53,13 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'backend.urls'
+
+Q_CLUSTER = {
+    'name': 'appointment',
+    'orm': 'default',
+    'timeout': 30,
+    'retry': 60,
+}
 
 TEMPLATES = [
     {
@@ -110,7 +118,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'zh-hans'
 
-TIME_ZONE = 'Asia/Shanghai'
+TIME_ZONE = 'PRC'
 
 USE_I18N = True
 
