@@ -87,7 +87,7 @@ def get_price(request):  # 获取（用户，乐器，房间）三元组的价�
         try:
             req = json.loads(request.body)
             price = price_service.get_price(
-                req["userpk"], req["instpk"], req["roompk"])
+                req["userpk"], req["roompk"], req["instpk"])
             if price == -1:  # 没有可用的价格规则
                 return HttpResponse("no valid price", status=406)
             return HttpResponse(price)
