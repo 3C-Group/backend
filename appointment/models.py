@@ -392,6 +392,7 @@ class ForbiddenInstrument(models.Model):  # 对于（用户组，乐器，时间
 class Notice(models.Model):
     title = models.CharField(max_length=30)
     content = models.CharField(max_length=1000)
+    author = models.CharField(max_length=30)
     file = models.FileField(upload_to="file/", default="file/NONE.txt")
     time = models.DateTimeField(default=datetime.datetime(1, 1, 1))  # 发布时间
     filename = models.CharField(max_length=100, default="")
@@ -403,6 +404,7 @@ class Notice(models.Model):
         noticeinfo["pk"] = self.pk
         noticeinfo["title"] = self.title
         noticeinfo["content"] = self.content
+        noticeinfo["author"] = self.author
         noticeinfo["time"] = datetime.datetime.strftime(self.time, TIME_FORMAT)
         noticeinfo["file"] = self.file.url if self.file else None
         noticeinfo["filename"] = self.filename if self.file else None
