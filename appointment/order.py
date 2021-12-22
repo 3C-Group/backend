@@ -43,8 +43,9 @@ def get_order(req):  # TODO
     if "begin_num" in req and "end_num" in req:
         data = data.order_by(
             "-begin_time")[int(req["begin_num"]):int(req["end_num"])]
-    ret_data = [item.get_dict() for item in data]  # 格式化
-    ret_data.append(num)
+    ret_data = {}
+    ret_data["data"] = [item.get_dict() for item in data]  # 格式化
+    ret_data["allnum"] = num
     json_data = json.dumps(ret_data, ensure_ascii=False)
     return json_data
 
