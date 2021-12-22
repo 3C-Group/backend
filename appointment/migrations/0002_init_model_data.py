@@ -15,14 +15,16 @@ def init_data(apps, schema_editor):
 
 
 def add_scheduled_task(apps, schema_editor):
-    from django_q.models import Schedule
+    Schedule = apps.get_model('django_q', 'Schedule')
     Schedule.objects.create(
         func='appointment.tasks.expire_by_5min',
+        schedule_type='I',
         minutes=1,
         repeats=-1,
     )
     Schedule.objects.create(
         func='appointment.tasks.expire_by_notused',
+        schedule_type='I',
         minutes=1,
         repeats=-1,
     )
