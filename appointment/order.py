@@ -44,6 +44,7 @@ def get_order(req):  # TODO
         data = data.order_by(
             "-begin_time")[int(req["begin_num"]):int(req["end_num"])]
     ret_data = [item.get_dict() for item in data]  # 格式化
+    ret_data.append(len(data))
     json_data = json.dumps(ret_data, ensure_ascii=False)
     return json_data
 
