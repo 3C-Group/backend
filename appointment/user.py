@@ -41,12 +41,13 @@ def get_user(req):
 
     if(len(Qset) > 0):
         data = data.filter(reduce(lambda x, y: x & y, Qset))
+    num = len(data)
 
     if "begin_num" in req and "end_num" in req:
         data = data.order_by(
             "openid")[int(req["begin_num"]):int(req["end_num"])]
     ret_data = [item.get_dict() for item in data]  # 格式化
-    ret_data.append(len(data))
+    ret_data.append(num)
     json_data = json.dumps(ret_data, ensure_ascii=False)
     return json_data
 
