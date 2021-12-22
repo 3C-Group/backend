@@ -74,11 +74,14 @@ def get_or_create_user(req):
             if status == UserProfile.Status.STUDENT:
                 studentgroup = UserGroup.objects.get(pk=STUDENT_PK)
                 user.group.add(studentgroup)
-            elif status == UserProfile.Status.STUDENT:
+            elif status == UserProfile.Status.TEACHER:
                 teachergroup = UserGroup.objects.get(pk=TEACHER_PK)
                 user.group.add(teachergroup)
         elif userset.count() == 1:
             ret["userpk"] = userset[0].pk
+            user = UserProfile.objects.get(pk = ret["userpk"])
+            user.openid = openid
+            user.save()
         ret["state"] = "success"
         return ret
     else:
@@ -93,6 +96,7 @@ def get_or_create_user(req):
             user = UserProfile.objects.get(pk=ret["userpk"])
             othergroup = UserGroup.objects.get(pk=OTHER_PK)
             user.group.add(othergroup)
+            user.save()
         elif userset.count() == 1:
             ret["userpk"] = userset[0].pk
         ret["state"] = "success"

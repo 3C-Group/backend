@@ -610,7 +610,7 @@ def get_token(request):
     try:
         if request.method == "POST":
             req = json.loads(request.body)
-            ret = verify_token(req["token"])
+            ret = verify_token(req)
             return HttpResponse(ret)
     except Exception as e:
         return HttpResponse(e, status=400)
