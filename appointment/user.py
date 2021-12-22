@@ -77,8 +77,7 @@ def get_or_create_user(req):
                 teachergroup = UserGroup.objects.get(pk=TEACHER_PK)
                 user.group.add(teachergroup)
         elif userset.count() == 1:
-            ret["userpk"] = userset[0].pk
-            user = UserProfile.objects.get(pk=ret["userpk"])
+            user = userset[0]
             user.openid = openid
             user.save()
         ret["state"] = "success"
