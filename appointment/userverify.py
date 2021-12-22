@@ -8,7 +8,8 @@ def verify_token(req):
     token_data = json.dumps({"token": req["token"]}, ensure_ascii=False)
     url = "https://alumni-test.iterator-traits.com/fake-id-tsinghua-proxy/api/user/session/token"
     try:
-        res = requests.post(url=url, data=token_data, headers = {'content-type': "application/json"})
+        res = requests.post(url=url, data=token_data, headers={
+                            'content-type': "application/json"})
         data = res.json()
         t = {"openid": req["openid"]}
         if "user" in data:
