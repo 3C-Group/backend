@@ -40,8 +40,6 @@ def get_order(req):  # TODO
     else:
         data = Order.objects.filter(reduce(lambda x, y: x & y, Qset))
     num = len(data)
-    if num == 0:
-        return "not found"
     if "begin_num" in req and "end_num" in req:
         data = data.order_by(
             "-begin_time")[int(req["begin_num"]):int(req["end_num"])]
