@@ -23,6 +23,9 @@ def get_room_order(roompk, begin, end) -> list:
     qbegin = Q(begin_time__lt=end)  # 涉及到该时间段(begin, end)的order, 满足开始时间小于end
     qend = Q(end_time__gt=begin)  # 涉及到该时间段(begin, end)的order, 满足结束时间大于begin
     order_set = order_set.filter(qbegin & qend)
+    qpaid = Q(status=Order.Status.PAID)
+    qunpaid = Q(status=Order.Status.UNPAID)
+    order_set = order_set.filter(qpaid | qunpaid)
 
     timeset = set()
     timeset.add(begin)
@@ -218,6 +221,9 @@ def get_inst_order(instpk, begin, end) -> list:
     qbegin = Q(begin_time__lt=end)  # 涉及到该时间段(begin, end)的order, 满足开始时间小于end
     qend = Q(end_time__gt=begin)  # 涉及到该时间段(begin, end)的order, 满足结束时间大于begin
     order_set = order_set.filter(qbegin & qend)
+    qpaid = Q(status=Order.Status.PAID)
+    qunpaid = Q(status=Order.Status.UNPAID)
+    order_set = order_set.filter(qpaid | qunpaid)
 
     timeset = set()
     timeset.add(begin)

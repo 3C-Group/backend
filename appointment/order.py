@@ -70,7 +70,7 @@ def create_order(req):  # 给定时间段， 房间， 乐器，用户： 创建
         return "too long period"
 
     price = ceil(get_price(req["userpk"], req["roompk"], req["instpk"]) *
-                 ((float((end_time.date() - begin_time.date()).seconds)) / 3600))
+                 ((float((end_time - begin_time).seconds)) / 3600))
     if price == -1:
         return "no permission to use"
 
