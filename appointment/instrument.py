@@ -42,6 +42,8 @@ def update_inst(req):
     inst = Instrument.objects.get(pk=req["pk"])  # 尝试获取该乐器
     if "name" in req:
         inst.name = req["name"]
+    if "description" in req:
+        inst.description = req["description"]
     inst.save()
     return "success"
 

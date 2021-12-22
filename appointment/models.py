@@ -18,15 +18,15 @@ class TypeManager(models.Manager):
 
 
 class InstManager(models.Manager):
-    def create_inst(self, name, typepk):
+    def create_inst(self, name, typepk, des):
         insttype = InstrumentType.objects.get(pk=typepk)
-        inst = self.create(name=name, type=insttype)
+        inst = self.create(name=name, type=insttype, description=des)
         return inst.pk
 
 
 class RoomManager(models.Manager):
-    def create_room(self, name, max_inst):
-        room = self.create(name=name, max_inst=max_inst)
+    def create_room(self, name, max_inst, des):
+        room = self.create(name=name, max_inst=max_inst, description=des)
         return room.pk
 
 
@@ -148,6 +148,7 @@ class Room(models.Model):
     max_inst = models.IntegerField(default=1)  # 房屋最多可以放置多少乐器
     img = models.ImageField(default="room/default_room.png",
                             upload_to='room/')  # 房间的照片
+    description = models.CharField(default="", max_length=1000)
 
     def __str__(self) -> str:
         return self.name
@@ -160,6 +161,7 @@ class Room(models.Model):
         roominfo["img"] = self.img.url
         roominfo["inst"] = [inst.pk for inst in Room.objects.get(
             pk=self.pk).instrument_set.all()]  # 所有可到访的乐器
+        roominfo["description"] = self.description
         return roominfo
 
     objects = RoomManager()
@@ -175,6 +177,7 @@ class Instrument(models.Model):
     )
     img = models.ImageField(default="inst/default_inst.png",
                             upload_to='inst/')  # 房间的照片
+    description = models.CharField(default="", max_length=1000)
 
     def __str__(self) -> str:
         return self.name
@@ -190,6 +193,7 @@ class Instrument(models.Model):
         instinfo["roompk"] = [rm.pk for rm in self.room.all()]
         instinfo["roomname"] = [rm.name for rm in self.room.all()]
         instinfo["roomnum"] = len(instinfo["roompk"])
+        instinfo["description"] = self.description
         return instinfo
 
     objects = InstManager()

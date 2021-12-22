@@ -179,8 +179,11 @@ def manage_inst(request):  # 管理乐器
             req = json.loads(request.body)
             if(req["typepk"] == 1):
                 return HttpResponse("cannot add null instrument", status=403)
+            des = ""
+            if "description" in req:
+                des = req["description"]
             instpk = Instrument.objects.create_inst(
-                name=req["name"], typepk=req["typepk"])
+                name=req["name"], typepk=req["typepk"], des=des)
             return HttpResponse(instpk)
         elif request.method == "DELETE":  # 删除乐器
             req = json.loads(request.body)
@@ -231,8 +234,11 @@ def manage_room(request):
             req = json.loads(request.body)
             if "max_inst" not in req:
                 req["max_inst"] = 1
+            des = ""
+            if "description" in req:
+                des = req["description"]
             roompk = Room.objects.create_room(
-                name=req["name"], max_inst=req["max_inst"])
+                name=req["name"], max_inst=req["max_inst"], des=des)
             return HttpResponse(roompk)
         elif request.method == "DELETE":  # 删除房间
             req = json.loads(request.body)

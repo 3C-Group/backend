@@ -42,6 +42,8 @@ def update_room(req):  # 修改房间信息
         room.name = req["name"]
     if "max_inst" in req:
         room.max_inst = req["max_inst"]
+    if "description" in req:
+        room.description = req["description"]
     room.save()
     return "success"
 
