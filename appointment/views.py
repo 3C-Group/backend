@@ -467,9 +467,10 @@ def manage_notice(request):
         if request.method == "POST":
             title = request.POST.get('title')
             content = request.POST.get('content')
+            author = request.POST.get('author')
             time = request.POST.get('time')
             file = request.FILES.get('file')
-            ret = notice_service.create_notice(title, content, time, file)
+            ret = notice_service.create_notice(title, content, author, time, file)
             return HttpResponse(ret)
         elif request.method == "GET":
             ret = notice_service.get_all_notice()
@@ -489,10 +490,11 @@ def modify_notice(request):
             noticepk = request.POST.get('noticepk')
             title = request.POST.get('title')
             content = request.POST.get('content')
+            author = request.POST.get('author')
             time = request.POST.get('time')
             file = request.FILES.get('file')
             ret = notice_service.modify_notice(
-                noticepk, title, content, time, file)
+                noticepk, title, content, author, time, file)
             return HttpResponse(ret)
     except Exception as e:
         return HttpResponse(e, status=400)

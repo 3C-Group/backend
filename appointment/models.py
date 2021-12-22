@@ -91,9 +91,9 @@ class OrderManager(models.Manager):
 
 
 class NoticeManager(models.Manager):
-    def create_notice(self, title, content, time):
+    def create_notice(self, title, content, author, time):
         notice = self.create(title=title, content=content,
-                             time=time, file=None)
+                             author=author, time=time, file=None)
         return notice.pk
 
 # --- models ---
@@ -192,7 +192,8 @@ class Instrument(models.Model):
             pk=instinfo["typepk"]).name  # 获取该乐器对应的乐器类型的名称
         instinfo["roompk"] = [rm.pk for rm in self.room.all()]
         instinfo["roomname"] = [rm.name for rm in self.room.all()]
-        instinfo["roomdescription"] = [rm.description for rm in self.room.all()]
+        instinfo["roomdescription"] = [
+            rm.description for rm in self.room.all()]
         instinfo["roomnum"] = len(instinfo["roompk"])
         instinfo["description"] = self.description
         return instinfo

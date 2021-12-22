@@ -9,9 +9,9 @@ def get_all_notice():
     return json.dumps(retdata, ensure_ascii=False)
 
 
-def create_notice(title, content, timetext,  file):
+def create_notice(title, content, author, timetext, file):
     time = datetime.datetime.strptime(timetext, TIME_FORMAT)
-    noticepk = Notice.objects.create_notice(title, content, time)
+    noticepk = Notice.objects.create_notice(title, content, author, time)
     if file:
         notice = Notice.objects.get(pk=noticepk)
         notice.file = file
@@ -20,7 +20,7 @@ def create_notice(title, content, timetext,  file):
     return noticepk
 
 
-def modify_notice(noticepk, title, content, timetext, file):
+def modify_notice(noticepk, title, content, author, timetext, file):
     notice = Notice.objects.get(pk=int(noticepk))
     if timetext:
         time = datetime.datetime.strptime(timetext, TIME_FORMAT)
@@ -29,6 +29,8 @@ def modify_notice(noticepk, title, content, timetext, file):
         notice.title = title
     if content:
         notice.content = content
+    if author:
+        notice.author = author
     if file:
         notice.file = file
         notice.filename = file.name
