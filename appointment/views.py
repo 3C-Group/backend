@@ -428,6 +428,34 @@ def verify_order(request):
     return HttpResponse('Method Not Allowed', status=405)
 
 
+def cancel_order(request):
+    try:
+        if request.method == "POST":
+            req = json.loads(request.body)
+            ret = order_service.cancel_order(req["orderpk"])
+            if ret:
+                return HttpResponse("success")
+            else:
+                return HttpResponse("fail", status=409)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
+def pay_order(request):
+    try:
+        if request.method == "POST":
+            req = json.loads(request.body)
+            ret = order_service.pay_order(req["orderpk"])
+            if ret != -1:
+                return HttpResponse(ret)
+            else:
+                return HttpResponse("fail", status=409)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
 def manage_notice(request):
     try:
         if request.method == "POST":

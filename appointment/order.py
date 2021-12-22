@@ -68,8 +68,8 @@ def create_order(req):  # 给定时间段， 房间， 乐器，用户： 创建
     if end_time > begin_time + datetime.timedelta(hours=3):
         return "too long period"
 
-    price = ceil(get_price(req["userpk"], req["roompk"], req["instpk"]) * \
-        ((float((end_time.date() - begin_time.date()).seconds)) / 3600))
+    price = ceil(get_price(req["userpk"], req["roompk"], req["instpk"]) *
+                 ((float((end_time.date() - begin_time.date()).seconds)) / 3600))
     if price == -1:
         return "no permission to use"
 
@@ -88,9 +88,15 @@ def create_order(req):  # 给定时间段， 房间， 乐器，用户： 创建
     if check_room_order(req["roompk"], begin_time, end_time):
         return "room order conflict"
 
-    orderpk = Order.objects.create_order(
+    order = Order.objects.create_order(
         req["userpk"], req["roompk"], req["instpk"], price, begin_time, end_time)
-    return orderpk
+    user = UserProfile.objects.get(pk=req["userpk"])
+    if user.balance >= price:
+        user.balance -= price
+        user.save()
+        order.status = Order.Status.PAID
+        order.save()
+    return order.pk
 
 
 def get_order_in_range(begin, end):
@@ -102,8 +108,40 @@ def get_order_in_range(begin, end):
 
 def verify_order(order_token):
     order = Order.objects.get(hash=order_token)
-    if order.status == Order.STATUS_PAID:
-        order.status = Order.STATUS_FINISHED
+    if order.status == Order.Status.PAID:
+        order.status = Order.Status.FINISHED
         order.save()
         return True
     return False
+
+
+def pay_order(orderpk):
+    order = Order.objects.get(pk=orderpk)
+    if order.status != Order.Status.UNPAID:
+        return -1
+    user = order.user
+    if user.balance >= order.price:
+        user.balance -= order.price
+        user.save()
+        order.status = Order.Status.PAID
+        order.save()
+    else:
+        order.paid = order.price - user.balance
+        user.balance = 0
+        user.save()
+        order.status = Order.Status.PAID
+        order.save()
+    return order.paid
+
+
+def cancel_order(orderpk):
+    order = Order.objects.get(pk=orderpk)
+    if order.status == Order.Status.PAID:
+        user = order.user
+        user.balance += order.price
+        user.save()
+    elif order.status == Order.Status.FINISHED or order.status == Order.Status.CANCELLED or order.status == Order.Status.OUTDATED:
+        return False
+    order.status = Order.Status.CANCELLED
+    order.save()
+    return True
