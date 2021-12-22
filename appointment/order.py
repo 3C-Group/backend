@@ -33,6 +33,8 @@ def get_order(req):  # TODO
             Qset.add(Q(end_time__lte=end_time))
         if "status" in req:
             Qset.add(Q(status=status_dict[req["status"]]))
+        if "hash" in req:
+            Qset.add(Q(hash__startswith=req["hash"]))
     if len(Qset) == 0:
         return "empty Qset"
     data = Order.objects.filter(reduce(lambda x, y: x & y, Qset))
@@ -53,7 +55,7 @@ def get_all_order(req):  # for test only
 
 def create_order(req):  # 给定时间段， 房间， 乐器，用户： 创建一个订单
     begin_time = datetime.datetime.strptime(req["begin_time"], TIME_FORMAT)
-    if begin_time.date() <= datetime.datetime.now().date() + datetime.timedelta(hours=1):
+    if begin_time <= datetime.datetime.now() + datetime.timedelta(hours=1):
         return "begin time is in the past"
     if begin_time.date() > datetime.datetime.now().date() + datetime.timedelta(days=7):
         return "begin time is too far away"
@@ -62,7 +64,7 @@ def create_order(req):  # 给定时间段， 房间， 乐器，用户： 创建
         raise ValueError("invalid time length")
     if end_time.date() > begin_time.date():
         return "end time must in the same day"
-    if end_time.date() > begin_time.date() + datetime.timedelta(hours=3):
+    if end_time > begin_time + datetime.timedelta(hours=3):
         return "too long period"
 
     price = ceil(get_price(req["userpk"], req["roompk"], req["instpk"]) * \
