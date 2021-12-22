@@ -36,8 +36,9 @@ def get_order(req):  # TODO
         if "hash" in req:
             Qset.add(Q(hash__startswith=req["hash"]))
     if len(Qset) == 0:
-        return "empty Qset"
-    data = Order.objects.filter(reduce(lambda x, y: x & y, Qset))
+        data = Order.objects.all()
+    else:
+        data = Order.objects.filter(reduce(lambda x, y: x & y, Qset))
     if len(data) == 0:
         return "not found"
     if "begin_num" in req and "end_num" in req:
