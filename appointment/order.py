@@ -5,6 +5,7 @@ from .models import *
 from .price import get_price
 from .availability import *
 from .instrument import check_inst_in_room
+from math import ceil
 
 TIME_FORMAT = '%Y/%m/%d %H:%M'  # 时间格式
 
@@ -32,6 +33,8 @@ def get_order(req):  # TODO
             Qset.add(Q(end_time__lte=end_time))
         if "status" in req:
             Qset.add(Q(status=status_dict[req["status"]]))
+        if "hash" in req:
+            Qset.add(Q(hash__startswith=req["hash"]))
     if len(Qset) == 0:
         return "empty Qset"
     data = Order.objects.filter(reduce(lambda x, y: x & y, Qset))
@@ -41,6 +44,7 @@ def get_order(req):  # TODO
         data = data.order_by(
             "-begin_time")[int(req["begin_num"]):int(req["end_num"])]
     ret_data = [item.get_dict() for item in data]  # 格式化
+    ret_data.append(len(data))
     json_data = json.dumps(ret_data, ensure_ascii=False)
     return json_data
 
@@ -52,7 +56,7 @@ def get_all_order(req):  # for test only
 
 def create_order(req):  # 给定时间段， 房间， 乐器，用户： 创建一个订单
     begin_time = datetime.datetime.strptime(req["begin_time"], TIME_FORMAT)
-    if begin_time.date() <= datetime.datetime.now().date() + datetime.timedelta(hours=1):
+    if begin_time <= datetime.datetime.now() + datetime.timedelta(hours=1):
         return "begin time is in the past"
     if begin_time.date() > datetime.datetime.now().date() + datetime.timedelta(days=7):
         return "begin time is too far away"
@@ -61,11 +65,11 @@ def create_order(req):  # 给定时间段， 房间， 乐器，用户： 创建
         raise ValueError("invalid time length")
     if end_time.date() > begin_time.date():
         return "end time must in the same day"
-    if end_time.date() > begin_time.date() + datetime.timedelta(hours=3):
+    if end_time > begin_time + datetime.timedelta(hours=3):
         return "too long period"
 
-    price = get_price(req["userpk"], req["roompk"], req["instpk"]) * \
-        ((float(end_time.date() - begin_time.date()).seconds) / 3600)
+    price = ceil(get_price(req["userpk"], req["roompk"], req["instpk"]) *
+                 ((float((end_time.date() - begin_time.date()).seconds)) / 3600))
     if price == -1:
         return "no permission to use"
 
@@ -84,9 +88,15 @@ def create_order(req):  # 给定时间段， 房间， 乐器，用户： 创建
     if check_room_order(req["roompk"], begin_time, end_time):
         return "room order conflict"
 
-    orderpk = Order.objects.create_order(
+    order = Order.objects.create_order(
         req["userpk"], req["roompk"], req["instpk"], price, begin_time, end_time)
-    return orderpk
+    user = UserProfile.objects.get(pk=req["userpk"])
+    if user.balance >= price:
+        user.balance -= price
+        user.save()
+        order.status = Order.Status.PAID
+        order.save()
+    return order.pk
 
 
 def get_order_in_range(begin, end):
@@ -98,8 +108,40 @@ def get_order_in_range(begin, end):
 
 def verify_order(order_token):
     order = Order.objects.get(hash=order_token)
-    if order.status == Order.STATUS_PAID:
-        order.status = Order.STATUS_FINISHED
+    if order.status == Order.Status.PAID:
+        order.status = Order.Status.FINISHED
         order.save()
         return True
     return False
+
+
+def pay_order(orderpk):
+    order = Order.objects.get(pk=orderpk)
+    if order.status != Order.Status.UNPAID:
+        return -1
+    user = order.user
+    if user.balance >= order.price:
+        user.balance -= order.price
+        user.save()
+        order.status = Order.Status.PAID
+        order.save()
+    else:
+        order.paid = order.price - user.balance
+        user.balance = 0
+        user.save()
+        order.status = Order.Status.PAID
+        order.save()
+    return order.paid
+
+
+def cancel_order(orderpk):
+    order = Order.objects.get(pk=orderpk)
+    if order.status == Order.Status.PAID:
+        user = order.user
+        user.balance += order.price
+        user.save()
+    elif order.status == Order.Status.FINISHED or order.status == Order.Status.CANCELLED or order.status == Order.Status.OUTDATED:
+        return False
+    order.status = Order.Status.CANCELLED
+    order.save()
+    return True

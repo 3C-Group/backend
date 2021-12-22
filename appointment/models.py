@@ -87,7 +87,7 @@ class OrderManager(models.Manager):
         hash = get_md5_8th(order.pk)
         order.hash = hash
         order.save()
-        return order.pk
+        return order
 
 
 class NoticeManager(models.Manager):
@@ -139,8 +139,7 @@ class UserProfile(models.Model):
         return
 
     def __str__(self) -> str:
-        return "{0} {1}".format(self.user.openid,
-                                self.user.thuid)
+        return "{0} {1}".format(self.openid, self.thuid)
     objects = UserProfileManager()
 
 

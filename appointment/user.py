@@ -21,9 +21,9 @@ def get_user_info():  # 获取所有用户的信息
 def get_user(req):
     Qset = set()
     if "thuid" in req:
-        Qset.add(Q(thuid=req["thuid"]))
+        Qset.add(Q(thuid__startswith=req["thuid"]))
     if "openid" in req:
-        Qset.add(Q(openid=req["openid"]))
+        Qset.add(Q(openid__startswith=req["openid"]))
     if "status" in req:
         if req["status"] == "STUDENT":
             Qset.add(Q(status=UserProfile.Status.STUDENT))
@@ -46,6 +46,7 @@ def get_user(req):
         data = data.order_by(
             "openid")[int(req["begin_num"]):int(req["end_num"])]
     ret_data = [item.get_dict() for item in data]  # 格式化
+    ret_data.append(len(data))
     json_data = json.dumps(ret_data, ensure_ascii=False)
     return json_data
 

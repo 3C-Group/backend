@@ -9,6 +9,8 @@ urlpatterns = [
 
     path("token/", views.get_token, name="get_token"),
     path("verify_order/", views.verify_order, name="verify_order"),
+    path("cancel_order/", views.cancel_order, name="cancel_order"),
+    path("pay_order/", views.pay_order, name="pay_order"),
 
     #  乐器管理
     path("manage/inst/", views.manage_inst, name="manage_inst"),
