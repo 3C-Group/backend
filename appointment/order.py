@@ -9,7 +9,7 @@ from math import ceil
 
 TIME_FORMAT = '%Y/%m/%d %H:%M'  # 时间格式
 
-status_dict = {"PAID": Order.Status.UNPAID, "FINISHED": Order.Status.FINISHED,
+status_dict = {"PAID": Order.Status.PAID, "FINISHED": Order.Status.FINISHED,
                "CANCELLED": Order.Status.CANCELLED, "UNPAID": Order.Status.UNPAID, "OUTDATED": Order.Status.OUTDATED}
 
 
