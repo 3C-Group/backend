@@ -20,6 +20,8 @@ def get_user_info():  # 获取所有用户的信息
 
 def get_user(req):
     Qset = set()
+    if "userpk" in req:
+        Qset.add(Q(pk=req["userpk"]))
     if "thuid" in req:
         Qset.add(Q(thuid__startswith=req["thuid"]))
     if "openid" in req:
