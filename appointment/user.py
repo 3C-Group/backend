@@ -78,6 +78,7 @@ def get_or_create_user(req):
                 user.group.add(teachergroup)
         elif userset.count() == 1:
             user = userset[0]
+            ret["userpk"] = user.pk
             user.openid = openid
             user.save()
         ret["state"] = "success"
