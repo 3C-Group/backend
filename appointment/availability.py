@@ -584,7 +584,7 @@ def get_time_from_room(userpk, instpk, roompk, begin_time, end_time):  # 给定�
             stampinfo["type"] = "inst_" + "order"
             stampinfo["begin_time"] = i_begin
             stampinfo["end_time"] = i_end
-            aval.append(stampinfo)
+            unaval.append(stampinfo)
         else:
             room_ava = get_room_avaliability(userpk, roompk, i_begin, i_end)
             for j in range(len(room_ava)):
