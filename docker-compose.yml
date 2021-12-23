@@ -1,0 +1,72 @@
+version: "3"
+services:
+  app:
+    restart: always
+    build: .
+    command: >
+      bash -c
+      "python3 manage.py makemigrations &&
+      python3 manage.py migrate &&
+      gunicorn --timeout=30 --workers=4 --bind :5000 --log-level=debug backend.wsgi:application"
+    volumes:
+      - .:/backend
+      - media-volume:/backend/media
+    expose:
+      - "5000"
+    depends_on:
+      - mysql
+    networks:
+      - web_network
+      - db_network
+    container_name: app
+  qcluster:
+    restart: always
+    build: .
+    command: >
+      bash -c
+      "python3 manage.py qcluster"
+    volumes:
+      - .:/backend
+    depends_on:
+      - app
+    networks:
+      - db_network
+    container_name: qcluster
+  mysql:
+    image: mysql:5.7
+    volumes:
+      - "/home/ubuntu/mysql/:/var/lib/mysql"
+    env_file: .env
+    expose:
+      - "3306"
+    restart: always
+    environment:
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - TZ=Asia/Shanghai
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    networks:
+      - db_network
+    container_name: mysql
+  nginx:
+    restart: always
+    image: nginx:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - media-volume:/app/media
+      - ./config/nginx:/etc/nginx/conf.d
+    depends_on:
+      - app
+    networks:
+      - web_network
+    container_name: nginx
+
+networks:
+  web_network:
+  db_network:
+
+volumes:
+  media-volume:
