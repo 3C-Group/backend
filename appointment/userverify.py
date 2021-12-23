@@ -16,7 +16,7 @@ def verify_token(req):
             t["thuid"] = data["user"]["card"]
             t["authorized"] = True
             ret = get_or_create_user(t)
-            return json.dumps({"userpk": ret["userpk"], "status": "STUDENT"})
+            return json.dumps({"userpk": ret["userpk"], "status": "STUDENT", "detail": data})
         else:
             t["authorized"] = False
             ret = get_or_create_user(t)
