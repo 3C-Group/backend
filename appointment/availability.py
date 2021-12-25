@@ -567,8 +567,8 @@ def get_single_inst_avalist(userpk, instpk, begin_time, end_time):
                 continue
             time_begin = max(time_begin, time_duration[0])
             time_end = min(time_end, time_duration[1])
-            aval.append({"begin": time_begin.strftime(
-                TIME_FORMAT), "end": time_end.strftime(TIME_FORMAT)})
+            aval.append({"begin_time": time_begin.strftime(
+                TIME_FORMAT), "end_time": time_end.strftime(TIME_FORMAT)})
     return aval, avalroom, unavalroom
 
 
