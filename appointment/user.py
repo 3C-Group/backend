@@ -61,7 +61,7 @@ def get_or_create_user(req):
     if req["authorized"] == True:
         thuid = req["thuid"]
         status = UserProfile.Status.STUDENT
-        # TODO : (FOR TEST)假设现在可用的都是学生
+        # TODO : 限于API限制，现在可用的都是学生
 
         userset = UserProfile.objects.filter(
             thuid=thuid)  # 筛选出账户中所有持有相同thuid的用户

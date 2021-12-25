@@ -71,9 +71,6 @@ def remove_inst_from_room(instpk, roompk):  # 删除某一个inst可以前往roo
     inst = Instrument.objects.get(pk=instpk)
     if not check_inst_in_room(instpk, roompk):  # 如果该乐器本来就不能前往该房间
         return "notexist"
-#    if Order.objects.all().filter(room=roompk,inst=instpk).count() == 0:  #存在对应的订单
-#        return "related order exist"
-    # TODO
     room = Room.objects.get(pk=roompk)
     inst.room.remove(room)
     return "success"
@@ -85,7 +82,7 @@ def check_rule(usergrouppk, instpk, begin, end):  # 检查这一时间段, 对�
     qbegin = Q(begin_time__lt=end)  # 涉及到该时间段(begin, end)的order, 满足开始时间小于end
     qend = Q(end_time__gt=begin)  # 涉及到该时间段(begin, end)的order, 满足结束时间大于begin
     rule_set = rule_set.filter(qbegin & qend)  # 筛选和该时间段重合的rule
-    if rule_set.count() > 1:
+    if rule_set.count() >= 1:
         return True
     return False
 

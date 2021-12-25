@@ -50,7 +50,7 @@ def get_order(req):  # TODO
     return json_data
 
 
-def get_all_order(req):  # for test only
+def get_all_order():  # for test only
     data = serializers.serialize("json", Order.objects.all())
     return data
 

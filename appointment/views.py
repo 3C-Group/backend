@@ -219,7 +219,6 @@ def manage_inst_to_room(request):
                 req["instpk"], req["roompk"])  # 移除单个乐器与单个房间的关系
             if ret == "notexist":
                 return HttpResponse("not exist", status=409)
-            # TODO : 有相关订单
             return HttpResponse("success")
     except Exception as e:
         return HttpResponse(e, status=400)
@@ -289,7 +288,6 @@ def manage_user(request):
         if request.method == "POST":  # 测试用 ： 创建新用户
             req = json.loads(request.body)
             ret = user_service.get_or_create_user(req)
-            # TODO : 处理openid/thuid 403情况
             return HttpResponse(ret["userpk"])
     except Exception as e:
         return HttpResponse(e, status=400)
@@ -445,9 +443,8 @@ def manage_order(request):
                or ret == "end time must in the same day" or ret == "too long period":
                 return HttpResponse(ret, status=403)
             return HttpResponse(ret)
-        elif request.method == "GET":  # TODO: only for test
-            req = json.loads(request.body)
-            data = order_service.get_all_order(req)
+        elif request.method == "GET":
+            data = order_service.get_all_order()
             return HttpResponse(data)
     except Exception as e:
         return HttpResponse(e, status=400)

@@ -472,11 +472,11 @@ def get_inst_avalist(userpk, typepk, begin_time, end_time):
         cur_time = begin_set[0]
         while j < len(end_set):
             if begin_set[j] <= end_set[j-1]:
-                ++j
+                j += 1
             else:
                 time_list.append((cur_time, end_set[j-1]))
                 cur_time = begin_set[j]
-                ++j
+                j += 1
         time_list.append((cur_time, end_set[j-1]))
         for inst_ava_duration in inst_ava:
             time_begin = inst_ava_duration[0]
@@ -556,11 +556,11 @@ def get_single_inst_avalist(userpk, instpk, begin_time, end_time):
     cur_time = begin_set[0]
     while j < len(end_set):
         if begin_set[j] <= end_set[j-1]:
-            ++j
+            j += 1
         else:
             time_list.append((cur_time, end_set[j-1]))
             cur_time = begin_set[j]
-            ++j
+            j += 1
     time_list.append((cur_time, end_set[j-1]))
     for inst_ava_duration in inst_ava:
         time_begin = inst_ava_duration[0]
