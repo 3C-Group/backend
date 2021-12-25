@@ -132,7 +132,7 @@ def set_inst_forbidden(req):  # 设置乐器禁用  [begin_time, end_time)
 
 
 def unset_inst_forbidden(rulepk):  # 解除乐器禁用  [begin_time, end_time)
-    rule = ForbiddenInstrument.objects.get(rulepk=rulepk)
+    rule = ForbiddenInstrument.objects.get(pk=rulepk)
     rule.delete()
     return True
 

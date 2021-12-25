@@ -105,7 +105,7 @@ def set_room_forbidden(req):  # 设置房间禁用  [begin_time, end_time)
 
 
 def unset_room_forbidden(rulepk):  # 解除乐器禁用  [begin_time, end_time)
-    rule = ForbiddenRoom.objects.get(rulepk=rulepk)
+    rule = ForbiddenRoom.objects.get(pk=rulepk)
     rule.delete()
     return True
 
