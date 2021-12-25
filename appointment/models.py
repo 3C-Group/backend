@@ -348,6 +348,18 @@ class ForbiddenRoom(models.Model):  # 对于（用户组，房间，时间段）
 
     objects = ForbiddenRoomManager()
 
+    def get_dict(self):
+        info = {}
+        info["pk"] = self.pk
+        info["group"] = self.group.pk
+        info["room"] = self.room.pk
+        info["begin_time"] = datetime.datetime.strftime(
+            self.begin_time, TIME_FORMAT)
+        info["end_time"] = datetime.datetime.strftime(
+            self.end_time, TIME_FORMAT)
+        info["status"] = self.get_status_detail(self.status)
+        return info
+
     @classmethod
     def get_status_detail(cls, arg):
         if arg == cls.Status.FIX:
@@ -379,6 +391,18 @@ class ForbiddenInstrument(models.Model):  # 对于（用户组，乐器，时间
                                  default=Status.FIX)
 
     objects = ForbiddenInstrumentManager()
+
+    def get_dict(self):
+        info = {}
+        info["pk"] = self.pk
+        info["group"] = self.group.pk
+        info["inst"] = self.inst.pk
+        info["begin_time"] = datetime.datetime.strftime(
+            self.begin_time, TIME_FORMAT)
+        info["end_time"] = datetime.datetime.strftime(
+            self.end_time, TIME_FORMAT)
+        info["status"] = self.get_status_detail(self.status)
+        return info
 
     @classmethod
     def get_status_detail(cls, arg):
