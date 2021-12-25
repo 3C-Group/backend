@@ -569,10 +569,9 @@ def get_inst_availability(request):
     try:
         if request.method == "POST":
             req = json.loads(request.body)
-            aval, unaval, avalroom, unavalroom = ava_service.get_single_inst_avalist(
+            aval, avalroom, unavalroom = ava_service.get_single_inst_avalist(
                 req["userpk"], req["instpk"], req["begin_time"], req["end_time"])
-            retdata = {"available": aval, "unavailable": unaval,
-                       "available_room": avalroom, "unavailable_room": unavalroom}
+            retdata = {"available": aval, "available_room": avalroom, "unavailable_room": unavalroom}
             json_data = json.dumps(retdata, ensure_ascii=False)
             return HttpResponse(json_data)
     except Exception as e:

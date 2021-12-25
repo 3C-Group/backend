@@ -506,7 +506,6 @@ def get_single_inst_avalist(userpk, instpk, begin_time, end_time):
     typepk = inst.type.pk
 
     aval = []
-    unaval = []
 
     avalroom = []
     unavalroom = []
@@ -517,8 +516,7 @@ def get_single_inst_avalist(userpk, instpk, begin_time, end_time):
             flag = True
             break
     if not flag:
-        unaval.append({"begin": begin_time, "end": end_time})
-        return aval, unaval, avalroom, unavalroom
+        return aval, avalroom, unavalroom
 
     instaval = get_inst_availability(userpk, instpk, begin_time, end_time)
     inst_ava = []
@@ -547,8 +545,7 @@ def get_single_inst_avalist(userpk, instpk, begin_time, end_time):
             unavalroom.append(
                 {"name": room.name, "description": room.description, "pk": room.pk})
     if len(begin_set) == 0:
-        unaval.append({"begin": begin_time, "end": end_time})
-        return aval, unaval, avalroom, unavalroom
+        return aval, avalroom, unavalroom
     begin_set = sorted(begin_set)
     end_set = sorted(end_set)
     time_list = []
@@ -572,7 +569,7 @@ def get_single_inst_avalist(userpk, instpk, begin_time, end_time):
             time_end = min(time_end, time_duration[1])
             aval.append({"begin": time_begin.strftime(
                 TIME_FORMAT), "end": time_end.strftime(TIME_FORMAT)})
-    return aval, unaval, avalroom, unavalroom
+    return aval, avalroom, unavalroom
 
 
 def get_room_from_time(userpk, instpk, begin_time, end_time):  # 给定时间段，获取房间的详情
