@@ -356,8 +356,8 @@ def manage_room_price(request):
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
 
-# * 设置用户组与房间的特殊规则禁用
 
+# * 设置用户组与房间的特殊规则禁用
 
 def manage_room_use(request):
     try:
@@ -371,12 +371,29 @@ def manage_room_use(request):
             elif ret == "forbidden":
                 return HttpResponse("cannot manage built-in room", status=403)
             return HttpResponse(ret)
+        elif request.method == "DELETE":
+            req = json.loads(request.body)
+            ret = room_service.unset_room_forbidden(req["rulepk"])
+            if ret == True:
+                return HttpResponse("success")
+            return HttpResponse("unknown error", status=400)
     except Exception as e:
         return HttpResponse(e, status=400)
     return HttpResponse('Method Not Allowed', status=405)
 
-# * 设置乐器实例的特殊规则禁用
 
+def get_room_forbidden(request):
+    try:
+        if request.method == "POST":
+            req = json.loads(request.body)
+            ret = room_service.get_room_forbidden(req)
+            return HttpResponse(ret)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
+# * 设置乐器实例的特殊规则禁用
 
 def manage_inst_use(request):
     try:
@@ -389,6 +406,23 @@ def manage_inst_use(request):
                 return HttpResponse("already partly forbidden", status=409)
             elif ret == "forbidden":
                 return HttpResponse("cannot manage built-in inst", status=403)
+            return HttpResponse(ret)
+        elif request.method == "DELETE":
+            req = json.loads(request.body)
+            ret = inst_service.unset_inst_forbidden(req["rulepk"])
+            if ret == True:
+                return HttpResponse("success")
+            return HttpResponse("unknown error", status=400)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
+def get_inst_forbidden(request):
+    try:
+        if request.method == "POST":
+            req = json.loads(request.body)
+            ret = inst_service.get_inst_forbidden(req)
             return HttpResponse(ret)
     except Exception as e:
         return HttpResponse(e, status=400)

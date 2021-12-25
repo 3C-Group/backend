@@ -1,5 +1,6 @@
 import json
 from django.core import serializers
+from functools import reduce
 from .models import *
 from .availability import *
 from django.db.models import Q
@@ -7,6 +8,9 @@ import datetime
 from .instrument import remove_inst_from_room
 
 TIME_FORMAT = '%Y/%m/%d %H:%M'
+
+status_dict = {"FIX": ForbiddenRoom.Status.FIX,
+               "ACTIVITY": ForbiddenRoom.Status.ACTIVITY, "OTHER": ForbiddenRoom.Status.OTHER}
 
 
 def get_room_info():  # 获取所有房间的信息
@@ -98,3 +102,42 @@ def set_room_forbidden(req):  # 设置房间禁用  [begin_time, end_time)
     rulepk = ForbiddenRoom.objects.create_rule(
         req["usergrouppk"], req["roompk"], begin_time, end_time, status)
     return rulepk
+
+
+def unset_room_forbidden(rulepk):  # 解除乐器禁用  [begin_time, end_time)
+    rule = ForbiddenRoom.objects.get(rulepk=rulepk)
+    rule.delete()
+    return True
+
+
+def get_room_forbidden(req):
+    Qset = set()
+    if "rulepk" in req:
+        Qset.add(Q(rulepk=req["rulepk"]))
+    else:
+        if "grouppk" in req:
+            Qset.add(Q(group_id=req["grouppk"]))
+        if "roompk" in req:
+            Qset.add(Q(room_id=req["roompk"]))
+        if "begin_time" in req:
+            begin_time = datetime.datetime.strptime(
+                req["begin_time"], TIME_FORMAT)
+            Qset.add(Q(begin_time__gte=begin_time))
+        if "end_time" in req:
+            end_time = datetime.datetime.strptime(req["end_time"], TIME_FORMAT)
+            Qset.add(Q(end_time__lte=end_time))
+        if "status" in req:
+            Qset.add(Q(status=status_dict[req["status"]]))
+    if len(Qset) == 0:
+        data = ForbiddenRoom.objects.all()
+    else:
+        data = ForbiddenRoom.objects.filter(reduce(lambda x, y: x & y, Qset))
+    num = len(data)
+    if "begin_num" in req and "end_num" in req:
+        data = data.order_by(
+            "-begin_time")[int(req["begin_num"]):int(req["end_num"])]
+    ret_data = {}
+    ret_data["data"] = [item.get_dict() for item in data]  # 格式化
+    ret_data["allnum"] = num
+    json_data = json.dumps(ret_data, ensure_ascii=False)
+    return json_data
