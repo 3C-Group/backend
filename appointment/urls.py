@@ -63,8 +63,8 @@ urlpatterns = [
          name="get_usergroup"),  # 获取所有的用户组信息
     path("get_user/", views.get_user, name="get_user"),  # 获得所有用户信息
     path("get_price/", views.get_price, name="get_price"),  # 获取（用户，房间，乐器）三元组的最低价格
-    path("get_room_avalilability/", views.get_room_avalilability,
-         name="get_room_avalilability"),  # 获取一段时间的房间可用性
+    path("get_room_availability/", views.get_room_availability,
+         name="get_room_availability"),  # 获取一段时间的房间可用性
     path("get_order/", views.get_order, name="get_order"),  # 获取所有的订单信息
     path("get_user/", views.get_user, name="get_user"),  # 获取所有的用户信息
     path("get_room_for_type/", views.get_room_for_type,
@@ -73,6 +73,8 @@ urlpatterns = [
          name="get_inst_for_type"),  # 获取某类型的所有乐器
     path("get_type_availability/", views.get_type_availability,
          name="get_type_availability"),  # 获取某类型的可用性
+    path("get_inst_availability/", views.get_inst_availability,
+         name="get_inst_availability"),  # 获取某乐器的可用性
     path("get_room_from_time/", views.get_room_from_time,
          name="get_room_from_time"),  # 获取某时间段，针对特定乐器与用户的房间可用性
     path("get_time_from_room/", views.get_time_from_room,

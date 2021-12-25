@@ -128,7 +128,7 @@ def get_room_rule(usergrouppk_set, roompk, begin, end) -> list:
 
 
 # 给定user, room, 以及时间段，返回这一整段时间内，room的可用性
-def get_room_avaliability(userpk, roompk, begin_time, end_time):
+def get_room_availability(userpk, roompk, begin_time, end_time):
 
     # 计算时间
     begin = datetime.datetime.strptime(begin_time, TIME_FORMAT)
@@ -324,7 +324,7 @@ def get_inst_rule(usergrouppk_set, instpk, begin, end) -> list:
 
 
 # 给定user, inst, 以及时间段，返回这一整段时间内，inst的可用性
-def get_inst_avaliability(userpk, instpk, begin_time, end_time):
+def get_inst_availability(userpk, instpk, begin_time, end_time):
     stamplist = []
     if instpk == 1:
         stamplist.append({"time": begin_time, "type": "ok", "status": 0})
@@ -415,7 +415,7 @@ def get_room_avalist(userpk, roompk, begin_time, end_time):
             break
     if not flag:
         return []
-    return get_room_avaliability(userpk, roompk, begin_time, end_time)
+    return get_room_availability(userpk, roompk, begin_time, end_time)
 
 
 def get_inst_avalist(userpk, typepk, begin_time, end_time):
@@ -441,7 +441,7 @@ def get_inst_avalist(userpk, typepk, begin_time, end_time):
             unaval.append({"pk": inst.pk, "name": inst.name})
         return aval, unaval
     for inst in insts:
-        instaval = get_inst_avaliability(userpk, inst.pk, begin_time, end_time)
+        instaval = get_inst_availability(userpk, inst.pk, begin_time, end_time)
         inst_ava = []
         for i in range(len(instaval)):
             if instaval[i]["type"] == "ok":
@@ -493,13 +493,95 @@ def get_inst_avalist(userpk, typepk, begin_time, end_time):
     return aval, unaval
 
 
+def get_single_inst_avalist(userpk, instpk, begin_time, end_time):
+    # 计算时间
+    begin = datetime.datetime.strptime(begin_time, TIME_FORMAT)
+    end = datetime.datetime.strptime(end_time, TIME_FORMAT)
+
+    # 搜集用户的所有用户组标签
+    user = UserProfile.objects.get(pk=userpk)
+    usergrouppk_set = [group.pk for group in user.group.all()]
+
+    inst = Instrument.objects.get(pk=instpk)
+    typepk = inst.type.pk
+
+    aval = []
+    unaval = []
+
+    avalroom = []
+    unavalroom = []
+
+    flag = False
+    for grouppk in usergrouppk_set:
+        if get_type_price(grouppk, typepk) != -1:
+            flag = True
+            break
+    if not flag:
+        unaval.append({"begin": begin_time, "end": end_time})
+        return aval, unaval, avalroom, unavalroom
+
+    instaval = get_inst_availability(userpk, instpk, begin_time, end_time)
+    inst_ava = []
+    for i in range(len(instaval)):
+        if instaval[i]["type"] == "ok":
+            inst_ava.append((datetime.datetime.strptime(instaval[i]["time"], TIME_FORMAT), end if i+1 == len(instaval)
+                            else datetime.datetime.strptime(instaval[i+1]["time"], TIME_FORMAT)))
+    begin_set = set()
+    end_set = set()
+    instroom_set = inst.room.all()
+    for room in instroom_set:
+        roompk = room.pk
+        roomaval = get_room_avalist(userpk, roompk, begin_time, end_time)
+        room_can_use = False
+        for i in range(len(roomaval)):
+            if roomaval[i]["type"] == "ok":
+                room_can_use = True
+                begin_set.add(datetime.datetime.strptime(
+                    roomaval[i]["time"], TIME_FORMAT))
+                end_set.add(end if i+1 == len(roomaval)
+                            else datetime.datetime.strptime(roomaval[i+1]["time"], TIME_FORMAT))
+        if room_can_use:
+            avalroom.append(
+                {"name": room.name, "description": room.description, "pk": room.pk})
+        else:
+            unavalroom.append(
+                {"name": room.name, "description": room.description, "pk": room.pk})
+    if len(begin_set) == 0:
+        unaval.append({"begin": begin_time, "end": end_time})
+        return aval, unaval, avalroom, unavalroom
+    begin_set = sorted(begin_set)
+    end_set = sorted(end_set)
+    time_list = []
+    j = 1
+    cur_time = begin_set[0]
+    while j < len(end_set):
+        if begin_set[j] <= end_set[j-1]:
+            ++j
+        else:
+            time_list.append((cur_time, end_set[j-1]))
+            cur_time = begin_set[j]
+            ++j
+    time_list.append((cur_time, end_set[j-1]))
+    for inst_ava_duration in inst_ava:
+        time_begin = inst_ava_duration[0]
+        time_end = inst_ava_duration[1]
+        for time_duration in time_list:
+            if time_begin >= time_duration[1] or time_end <= time_duration[0]:
+                continue
+            time_begin = max(time_begin, time_duration[0])
+            time_end = min(time_end, time_duration[1])
+            aval.append({"begin": time_begin.strftime(
+                TIME_FORMAT), "end": time_end.strftime(TIME_FORMAT)})
+    return aval, unaval, avalroom, unavalroom
+
+
 def get_room_from_time(userpk, instpk, begin_time, end_time):  # 给定时间段，获取房间的详情
     aval = []
     unaval = []
 
     inst = Instrument.objects.get(pk=instpk)
 
-    inst_ava = get_inst_avaliability(userpk, instpk, begin_time, end_time)
+    inst_ava = get_inst_availability(userpk, instpk, begin_time, end_time)
     if len(inst_ava) == 1 and inst_ava[0]["type"] == "ok":  # 首先检查乐器是否可用
         ifinstava = True
     else:
@@ -524,7 +606,7 @@ def get_room_from_time(userpk, instpk, begin_time, end_time):  # 给定时间段
     roomset = inst.room.all()
 
     for room in roomset:  # 对房间检查
-        room_ava = get_room_avaliability(userpk, room.pk, begin_time, end_time)
+        room_ava = get_room_availability(userpk, room.pk, begin_time, end_time)
         roominfo = {}
         roominfo["pk"] = room.pk
         roominfo["name"] = room.name
@@ -562,7 +644,7 @@ def get_time_from_room(userpk, instpk, roompk, begin_time, end_time):  # 给定�
     aval = []
     unaval = []
 
-    inst_ava = get_inst_avaliability(userpk, instpk, begin_time, end_time)
+    inst_ava = get_inst_availability(userpk, instpk, begin_time, end_time)
 
     for i in range(len(inst_ava)):
         i_begin = inst_ava[i]["time"]
@@ -586,7 +668,7 @@ def get_time_from_room(userpk, instpk, roompk, begin_time, end_time):  # 给定�
             stampinfo["end_time"] = i_end
             unaval.append(stampinfo)
         else:
-            room_ava = get_room_avaliability(userpk, roompk, i_begin, i_end)
+            room_ava = get_room_availability(userpk, roompk, i_begin, i_end)
             for j in range(len(room_ava)):
                 stampinfo = {}
                 stampinfo["begin_time"] = room_ava[j]["time"]

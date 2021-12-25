@@ -470,7 +470,8 @@ def manage_notice(request):
             author = request.POST.get('author')
             time = request.POST.get('time')
             file = request.FILES.get('file')
-            ret = notice_service.create_notice(title, content, author, time, file)
+            ret = notice_service.create_notice(
+                title, content, author, time, file)
             return HttpResponse(ret)
         elif request.method == "GET":
             ret = notice_service.get_all_notice()
@@ -504,11 +505,11 @@ def modify_notice(request):
 # 获取（用户，房间，时间段）内，房间的整体可用性
 
 
-def get_room_avalilability(request):
+def get_room_availability(request):
     try:
         if request.method == "POST":
             req = json.loads(request.body)
-            retdata = ava_service.get_room_avaliability(
+            retdata = ava_service.get_room_availability(
                 req["userpk"], req["roompk"], req["begin_time"], req["end_time"])
             json_data = json.dumps(retdata, ensure_ascii=False)
             return HttpResponse(json_data)
@@ -526,6 +527,21 @@ def get_type_availability(request):
             aval, unaval = ava_service.get_inst_avalist(
                 req["userpk"], req["typepk"], req["begin_time"], req["end_time"])
             retdata = {"available": aval, "unavailable": unaval}
+            json_data = json.dumps(retdata, ensure_ascii=False)
+            return HttpResponse(json_data)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
+def get_inst_availability(request):
+    try:
+        if request.method == "POST":
+            req = json.loads(request.body)
+            aval, unaval, avalroom, unavalroom = ava_service.get_single_inst_avalist(
+                req["userpk"], req["instpk"], req["begin_time"], req["end_time"])
+            retdata = {"available": aval, "unavailable": unaval,
+                       "available_room": avalroom, "unavailable_room": unavalroom}
             json_data = json.dumps(retdata, ensure_ascii=False)
             return HttpResponse(json_data)
     except Exception as e:
