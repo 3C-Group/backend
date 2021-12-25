@@ -222,16 +222,12 @@ class RoomTest(TestCase):
         self.assertEqual(len(aval), 1)
         self.assertEqual(len(unaval), 0)
 
-        aval, unaval, avalroom, unavalroom = ava_service.get_single_inst_avalist(
+        aval, _, avalroom, _ = ava_service.get_single_inst_avalist(
             1, inst, st_1, ed_1)
 
-#        self.assertEqual(len(aval), 2)
-#        self.assertEqual(len(unaval), 0)
+        self.assertEqual(len(aval), 2)
         self.assertEqual(len(avalroom), 1)
-        self.assertEqual(len(unavalroom), 0)
 
-#        ret = usergroup_service.get_order({"begin": 1})
-#        self.assertEqual(0, ret["allnum"])
         aval, unaval = ava_service.get_room_from_time(1, inst, st_1, ed_1)
         self.assertEqual(len(aval), 0)
         self.assertEqual(len(unaval), 1)

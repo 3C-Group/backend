@@ -13,7 +13,7 @@ status_dict = {"PAID": Order.Status.PAID, "FINISHED": Order.Status.FINISHED,
                "CANCELLED": Order.Status.CANCELLED, "UNPAID": Order.Status.UNPAID, "OUTDATED": Order.Status.OUTDATED}
 
 
-def get_order(req):  # TODO
+def get_order(req):
     Qset = set()
     if "orderpk" in req:
         Qset.add(Q(pk=req["orderpk"]))

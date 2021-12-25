@@ -8,7 +8,7 @@ TIME_FORMAT = '%Y/%m/%d %H:%M'  # 时间格式
 # --- managers ---
 
 # get_dict : 为了综合浏览所有信息时的格式化
-# TODO： get_detail : 获取某个模型的完全详情信息
+# get_detail : 获取某个模型的完全详情信息
 
 
 class TypeManager(models.Manager):
