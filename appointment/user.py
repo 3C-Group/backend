@@ -83,6 +83,14 @@ def get_or_create_user(req):
             ret["userpk"] = user.pk
             user.openid = openid
             user.save()
+        userset = UserProfile.objects.filter(openid=openid)
+        for user in userset:
+            if user.pk != ret["userpk"]:
+                if user.status == UserProfile.Status.UNAUTHORIZED:
+                    user.delete()
+                else:
+                    user.openid = "default-openid"
+                    user.save()
         ret["state"] = "success"
         return ret
     else:
@@ -100,6 +108,13 @@ def get_or_create_user(req):
             user.save()
         elif userset.count() == 1:
             ret["userpk"] = userset[0].pk
+        for user in userset:
+            if user.pk != ret["userpk"]:
+                if user.status == UserProfile.Status.UNAUTHORIZED:
+                    user.delete()
+                else:
+                    user.openid = "default-openid"
+                    user.save()
         ret["state"] = "success"
         return ret
 
