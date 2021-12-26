@@ -20,10 +20,11 @@ class RoomTest(TestCase):
         self.assertIsNotNone(ret)
 
     def test_get(self):
+        ret = user_service.get_user_from_openid("openid")
         ret = json.loads(verify_token(
             {"openid": "openid", "token": "not-valid"}))
         self.assertEqual(1, ret["userpk"])
-        self.assertEqual("OTHER", ret["status"])
+        self.assertEqual("UNAUTHORIZED", ret["status"])
 
         ret = price_service.get_price(1, 1, 1)
         self.assertEqual(-1, ret)
@@ -222,7 +223,7 @@ class RoomTest(TestCase):
         self.assertEqual(len(aval), 1)
         self.assertEqual(len(unaval), 0)
 
-        aval, _, avalroom, _ = ava_service.get_single_inst_avalist(
+        aval, avalroom, _ = ava_service.get_single_inst_avalist(
             1, inst, st_1, ed_1)
 
         self.assertEqual(len(aval), 2)

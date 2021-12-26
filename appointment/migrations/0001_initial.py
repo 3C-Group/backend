@@ -73,7 +73,7 @@ class Migration(migrations.Migration):
                 ('thuid', models.CharField(default='default-thuid', max_length=64)),
                 ('openid', models.CharField(default='default-openid', max_length=64)),
                 ('balance', models.IntegerField(default=0)),
-                ('status', models.IntegerField(choices=[(1, 'Student'), (2, 'Teacher'), (3, 'Other'), (100, 'Unauthorized')], default=100)),
+                ('status', models.IntegerField(choices=[(1, 'Student'), (2, 'Teacher'), (3, 'Unauthorized')], default=100)),
                 ('group', models.ManyToManyField(to='appointment.UserGroup')),
             ],
         ),

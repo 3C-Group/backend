@@ -27,6 +27,6 @@ def verify_token(req):
         else:
             t["authorized"] = False
             ret = get_or_create_user(t)
-            return json.dumps({"userpk": ret["userpk"], "status": "OTHER"})
+            return json.dumps({"userpk": ret["userpk"], "status": "UNAUTHORIZED"})
     except:
         return json.dumps({"status": "failed"})
