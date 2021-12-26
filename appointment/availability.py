@@ -447,8 +447,8 @@ def get_inst_avalist(userpk, typepk, begin_time, end_time):
             if instaval[i]["type"] == "ok":
                 inst_ava.append((datetime.datetime.strptime(instaval[i]["time"], TIME_FORMAT), end if i+1 == len(instaval)
                                 else datetime.datetime.strptime(instaval[i+1]["time"], TIME_FORMAT)))
-        begin_set = set()
-        end_set = set()
+        begin_list = []
+        end_list = []
         instpk = inst.pk
         instroom_set = inst.room.all()
         for room in instroom_set:
@@ -456,28 +456,28 @@ def get_inst_avalist(userpk, typepk, begin_time, end_time):
             roomaval = get_room_avalist(userpk, roompk, begin_time, end_time)
             for i in range(len(roomaval)):
                 if roomaval[i]["type"] == "ok":
-                    begin_set.add(datetime.datetime.strptime(
+                    begin_list.append(datetime.datetime.strptime(
                         roomaval[i]["time"], TIME_FORMAT))
-                    end_set.add(end if i+1 == len(roomaval)
+                    end_list.append(end if i+1 == len(roomaval)
                                 else datetime.datetime.strptime(roomaval[i+1]["time"], TIME_FORMAT))
-        if len(begin_set) == 0:
+        if len(begin_list) == 0:
             unaval.append({"instprice": get_inst_price_user(
                 userpk, instpk), "instdetail": Instrument.objects.get(pk=instpk).get_dict()})
             continue
-        begin_set = sorted(begin_set)
-        end_set = sorted(end_set)
+        begin_list = sorted(begin_list)
+        end_list = sorted(end_list)
         time_list = []
         result = []
         j = 1
-        cur_time = begin_set[0]
-        while j < len(end_set):
-            if begin_set[j] <= end_set[j-1]:
+        cur_time = begin_list[0]
+        while j < len(end_list):
+            if begin_list[j] <= end_list[j-1]:
                 j += 1
             else:
-                time_list.append((cur_time, end_set[j-1]))
-                cur_time = begin_set[j]
+                time_list.append((cur_time, end_list[j-1]))
+                cur_time = begin_list[j]
                 j += 1
-        time_list.append((cur_time, end_set[j-1]))
+        time_list.append((cur_time, end_list[j-1]))
         for inst_ava_duration in inst_ava:
             time_begin = inst_ava_duration[0]
             time_end = inst_ava_duration[1]
@@ -524,8 +524,8 @@ def get_single_inst_avalist(userpk, instpk, begin_time, end_time):
         if instaval[i]["type"] == "ok":
             inst_ava.append((datetime.datetime.strptime(instaval[i]["time"], TIME_FORMAT), end if i+1 == len(instaval)
                             else datetime.datetime.strptime(instaval[i+1]["time"], TIME_FORMAT)))
-    begin_set = set()
-    end_set = set()
+    begin_list = []
+    end_list = []
     instroom_set = inst.room.all()
     for room in instroom_set:
         roompk = room.pk
@@ -534,9 +534,9 @@ def get_single_inst_avalist(userpk, instpk, begin_time, end_time):
         for i in range(len(roomaval)):
             if roomaval[i]["type"] == "ok":
                 room_can_use = True
-                begin_set.add(datetime.datetime.strptime(
+                begin_list.append(datetime.datetime.strptime(
                     roomaval[i]["time"], TIME_FORMAT))
-                end_set.add(end if i+1 == len(roomaval)
+                end_list.append(end if i+1 == len(roomaval)
                             else datetime.datetime.strptime(roomaval[i+1]["time"], TIME_FORMAT))
         if room_can_use:
             avalroom.append(
@@ -544,21 +544,21 @@ def get_single_inst_avalist(userpk, instpk, begin_time, end_time):
         else:
             unavalroom.append(
                 {"name": room.name, "description": room.description, "pk": room.pk})
-    if len(begin_set) == 0:
+    if len(begin_list) == 0:
         return aval, avalroom, unavalroom
-    begin_set = sorted(begin_set)
-    end_set = sorted(end_set)
+    begin_list = sorted(begin_list)
+    end_list = sorted(end_list)
     time_list = []
     j = 1
-    cur_time = begin_set[0]
-    while j < len(end_set):
-        if begin_set[j] <= end_set[j-1]:
+    cur_time = begin_list[0]
+    while j < len(end_list):
+        if begin_list[j] <= end_list[j-1]:
             j += 1
         else:
-            time_list.append((cur_time, end_set[j-1]))
-            cur_time = begin_set[j]
+            time_list.append((cur_time, end_list[j-1]))
+            cur_time = begin_list[j]
             j += 1
-    time_list.append((cur_time, end_set[j-1]))
+    time_list.append((cur_time, end_list[j-1]))
     for inst_ava_duration in inst_ava:
         time_begin = inst_ava_duration[0]
         time_end = inst_ava_duration[1]
