@@ -571,7 +571,8 @@ def get_inst_availability(request):
             req = json.loads(request.body)
             aval, avalroom, unavalroom = ava_service.get_single_inst_avalist(
                 req["userpk"], req["instpk"], req["begin_time"], req["end_time"])
-            retdata = {"available": aval, "available_room": avalroom, "unavailable_room": unavalroom}
+            retdata = {"available": aval, "available_room": avalroom,
+                       "unavailable_room": unavalroom}
             json_data = json.dumps(retdata, ensure_ascii=False)
             return HttpResponse(json_data)
     except Exception as e:
@@ -693,6 +694,32 @@ def get_token(request):
         if request.method == "POST":
             req = json.loads(request.body)
             ret = verify_token(req)
+            return HttpResponse(ret)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
+def unbind(request):
+    try:
+        if request.method == "POST":
+            req = json.loads(request.body)
+            flag, ret = user_service.user_unbind(req["openid"])
+            if not flag:
+                return HttpResponse(ret, status=403)
+            return HttpResponse(ret)
+    except Exception as e:
+        return HttpResponse(e, status=400)
+    return HttpResponse('Method Not Allowed', status=405)
+
+
+def get_user_from_openid(request):
+    try:
+        if request.method == "POST":
+            req = json.loads(request.body)
+            flag, ret = user_service.get_user_from_openid(req["openid"])
+            if not flag:
+                return HttpResponse(ret, status=403)
             return HttpResponse(ret)
     except Exception as e:
         return HttpResponse(e, status=400)

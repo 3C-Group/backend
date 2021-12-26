@@ -3,6 +3,7 @@ from django.core import serializers
 from functools import reduce
 from .models import *
 from django.db.models import Q
+from .order import cancel_order
 
 STUDENT_PK = 1
 TEACHER_PK = 2
@@ -56,9 +57,13 @@ def get_user(req):
 
 def get_or_create_user(req):
     openid = req["openid"]
-
     ret = {}
     if req["authorized"] == True:
+
+        open_user_set = UserProfile.objects.filter(openid=openid)
+        if open_user_set.count() != 1:
+            raise ValueError("more than one users have same openid")
+        open_user = open_user_set[0]
         thuid = req["thuid"]
         status = UserProfile.Status.STUDENT
         # TODO : 限于API限制，现在可用的都是学生
@@ -79,18 +84,30 @@ def get_or_create_user(req):
                 teachergroup = UserGroup.objects.get(pk=TEACHER_PK)
                 user.group.add(teachergroup)
         elif userset.count() == 1:
+            # 将用户信息从未验证向已验证迁移
             user = userset[0]
             ret["userpk"] = user.pk
             user.openid = openid
             user.save()
-        userset = UserProfile.objects.filter(openid=openid)
-        for user in userset:
-            if user.pk != ret["userpk"]:
-                if user.status == UserProfile.Status.UNAUTHORIZED:
-                    user.delete()
-                else:
-                    user.openid = "default-openid"
-                    user.save()
+            # 修改openid
+
+        del_order = []
+        for order in open_user.order_set.all():
+            if order.status == Order.Status.PAID:  # 不能有已支付的订单
+                raise ValueError("paid orders exist")
+            elif order.status == Order.Status.UNPAID:  # 强制取消所有未支付的订单
+                del_order.append(order)
+            else:  # 其他订单进行迁移
+                order.user = user
+                order.save()
+
+        for order in del_order:  # 强制取消所有未支付的订单
+            cancel_order(order.pk)
+
+        add_balance(user.pk, open_user.balance)  # 合并余额
+
+        open_user.delete()
+
         ret["state"] = "success"
         return ret
     else:
@@ -108,15 +125,34 @@ def get_or_create_user(req):
             user.save()
         elif userset.count() == 1:
             ret["userpk"] = userset[0].pk
-        for user in userset:
-            if user.pk != ret["userpk"]:
-                if user.status == UserProfile.Status.UNAUTHORIZED:
-                    user.delete()
-                else:
-                    user.openid = "default-openid"
-                    user.save()
         ret["state"] = "success"
         return ret
+
+
+def user_unbind(openid):
+    userset = UserProfile.objects.filter(openid=openid)
+    if userset.count() == 0:
+        return False, "no user with this openid"
+    if userset.count() > 1:
+        return False, "more than one users with this openid"
+    user = userset[0]
+    if user.status != UserProfile.Status.UNAUTHORIZED:
+        user.openid = "default-openid"
+        user.save()
+    else:
+        return False, "user with this openid is unauthorized"
+    user = get_or_create_user({"openid": openid, "authorized": False})
+    return True, user["userpk"]
+
+
+def get_user_from_openid(openid):
+    userset = UserProfile.objects.filter(openid=openid)
+    if userset.count() > 1:
+        return False, "more than one users with this openid"
+    if userset.count() == 1:
+        return True, userset[0].pk
+    userpk = get_or_create_user({"openid": openid, "authorized": False})
+    return True, userpk
 
 
 def set_usergroup(userpk, usergrouppk):  # 设置用户到用户组
