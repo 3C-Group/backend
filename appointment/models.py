@@ -110,7 +110,6 @@ class UserProfile(models.Model):
     class Status(models.IntegerChoices):
         STUDENT = 1         # 24岁，是学生
         TEACHER = 2         # 是老师
-        OTHER = 3           # 不知道是个啥，可能是邱宝？
         UNAUTHORIZED = 100  # 未验证身份的用户
 
     status = models.IntegerField(
@@ -125,8 +124,6 @@ class UserProfile(models.Model):
             info["status"] = "STUDENT"
         elif self.status == self.Status.TEACHER:
             info["status"] = "TEACHER"
-        elif self.status == self.Status.OTHER:
-            info["status"] = "OTHER"
         else:
             info["status"] = "UNAUTHORIZED"
         info["openid"] = self.openid

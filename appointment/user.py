@@ -7,7 +7,7 @@ from .order import cancel_order
 
 STUDENT_PK = 1
 TEACHER_PK = 2
-OTHER_PK = 3
+UNAUTH_PK = 3
 
 
 def get_user_info():  # 获取所有用户的信息
@@ -34,8 +34,6 @@ def get_user(req):
             Qset.add(Q(status=UserProfile.Status.TEACHER))
         elif req["status"] == "UNAUTHORIZED":
             Qset.add(Q(status=UserProfile.Status.UNAUTHORIZED))
-        else:
-            Qset.add(Q(status=UserProfile.Status.OTHER))
 
     if "grouppk" in req:
         data = UserGroup.objects.get(pk=req["grouppk"]).userprofile_set.all()
@@ -57,10 +55,12 @@ def get_user(req):
 
 def get_or_create_user(req):
     openid = req["openid"]
+
     ret = {}
     if req["authorized"] == True:
 
         open_user_set = UserProfile.objects.filter(openid=openid)
+
         if open_user_set.count() != 1:
             raise ValueError("more than one users have same openid")
         open_user = open_user_set[0]
@@ -74,39 +74,44 @@ def get_or_create_user(req):
             raise ValueError("more than one users have same thuid")
 
         if userset.count() == 0:
-            ret["userpk"] = UserProfile.objects.create_user(
-                openid, status, thuid)
-            user = UserProfile.objects.get(pk=ret["userpk"])
+            ret["userpk"] = open_user.pk
+            unauthgroup = UserGroup.objects.get(pk=UNAUTH_PK)
+            open_user.group.remove(unauthgroup)
             if status == UserProfile.Status.STUDENT:
                 studentgroup = UserGroup.objects.get(pk=STUDENT_PK)
-                user.group.add(studentgroup)
+                open_user.group.add(studentgroup)
+                open_user.status = UserProfile.Status.STUDENT
+                open_user.thuid = thuid
+                open_user.save()
             elif status == UserProfile.Status.TEACHER:
                 teachergroup = UserGroup.objects.get(pk=TEACHER_PK)
-                user.group.add(teachergroup)
+                open_user.group.add(teachergroup)
+                open_user.status = UserProfile.Status.TEACHER
+                open_user.thuid = thuid
+                open_user.save()
         elif userset.count() == 1:
-            # 将用户信息从未验证向已验证迁移
+            # 修改openid
             user = userset[0]
             ret["userpk"] = user.pk
             user.openid = openid
             user.save()
-            # 修改openid
 
-        del_order = []
-        for order in open_user.order_set.all():
-            if order.status == Order.Status.PAID:  # 不能有已支付的订单
-                raise ValueError("paid orders exist")
-            elif order.status == Order.Status.UNPAID:  # 强制取消所有未支付的订单
-                del_order.append(order)
-            else:  # 其他订单进行迁移
-                order.user = user
-                order.save()
+            # 将用户信息从未验证向已验证迁移
+            del_order = []
+            for order in open_user.order_set.all():
+                if order.status == Order.Status.PAID:  # 不能有已支付的订单
+                    raise ValueError("paid orders exist")
+                else:  # 其他订单进行迁移
+                    order.user = user
+                    order.save()
+                    if order.status == Order.Status.UNPAID:  # 强制取消所有未支付的订单
+                        del_order.append(order)
 
-        for order in del_order:  # 强制取消所有未支付的订单
-            cancel_order(order.pk)
+            for order in del_order:  # 强制取消所有未支付的订单
+                cancel_order(order.pk)
 
-        add_balance(user.pk, open_user.balance)  # 合并余额
-
-        open_user.delete()
+            add_balance(user.pk, open_user.balance)  # 合并余额
+            open_user.delete()
 
         ret["state"] = "success"
         return ret
@@ -120,8 +125,8 @@ def get_or_create_user(req):
         if userset.count() == 0:
             ret["userpk"] = UserProfile.objects.create_user(openid, status)
             user = UserProfile.objects.get(pk=ret["userpk"])
-            othergroup = UserGroup.objects.get(pk=OTHER_PK)
-            user.group.add(othergroup)
+            unauthgroup = UserGroup.objects.get(pk=UNAUTH_PK)
+            user.group.add(unauthgroup)
             user.save()
         elif userset.count() == 1:
             ret["userpk"] = userset[0].pk
@@ -151,8 +156,8 @@ def get_user_from_openid(openid):
         return False, "more than one users with this openid"
     if userset.count() == 1:
         return True, userset[0].pk
-    userpk = get_or_create_user({"openid": openid, "authorized": False})
-    return True, userpk
+    ret = get_or_create_user({"openid": openid, "authorized": False})
+    return True, ret["userpk"]
 
 
 def set_usergroup(userpk, usergrouppk):  # 设置用户到用户组
